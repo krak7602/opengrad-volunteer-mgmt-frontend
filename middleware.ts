@@ -68,16 +68,27 @@ export default auth((req) => {
             hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
             hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
         ) {
-            if (path !== '/login') {
+            if (path !== '/login' && path !== '/setup') {
                 return NextResponse.redirect(new URL(`/login`, `http://${hostname}`))
             }
-            if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-                return NextResponse.rewrite(new URL(`/admin/login`, req.url))
-            } else if (hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-                return NextResponse.rewrite(new URL(`/partner/login`, req.url))
-            } else if (hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-                return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
+            if (path == '/login') {
+                if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+                    return NextResponse.rewrite(new URL(`/admin/login`, req.url))
+                } else if (hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+                    return NextResponse.rewrite(new URL(`/partner/login`, req.url))
+                } else if (hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+                    return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
+                }
+            } else if (path == '/setup') {
+                if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+                    return NextResponse.rewrite(new URL(`/admin/setup`, req.url))
+                } else if (hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+                    return NextResponse.rewrite(new URL(`/partner/setup`, req.url))
+                } else if (hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+                    return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
+                }
             }
+
         }
     }
 
@@ -89,7 +100,7 @@ export default auth((req) => {
             hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
             hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
         ) {
-            let puthURL  = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
+            let puthURL = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
             return NextResponse.rewrite(puthURL.href)
         }
     }

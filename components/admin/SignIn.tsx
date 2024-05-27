@@ -86,7 +86,7 @@ export default function SignIn() {
                                     <FormItem className="relative space-y-2">
                                         <div className="flex items-center">
                                             <FormLabel>Password</FormLabel>
-                                            <ForgotPasswordPopup/>
+                                            <ForgotPasswordPopup />
 
                                             {/* <Dialog>
                                                 <DialogTrigger
@@ -111,7 +111,7 @@ export default function SignIn() {
                                         <FormControl>
                                             <div>
                                                 <Input placeholder="" {...field} required type={showPassword ? "text" : "password"} />
-                                                <Button className="absolute top-9 right-1 h-7 w-7" size="icon" variant="ghost" onClick={togglePasswordVisiblity}>
+                                                <Button className="absolute top-9 right-1 h-7 w-7 " size="icon" variant="ghost" onClick={togglePasswordVisiblity}>
                                                     <EyeIcon className={showPassword ? "visible h-4 w-4" : "hidden"} />
                                                     <EyeSlashIcon className={showPassword ? "hidden" : "visible h-4 w-4"} />
                                                     <span className="sr-only">Toggle password visibility</span>

@@ -11,6 +11,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { AddOrgForm } from "@/components/volunteer/AddOrgForm"
+import { AddOrgPopup } from "@/components/volunteer/AddOrgPopup"
 
 export default function DataTable() {
     return (
@@ -26,7 +27,8 @@ export default function DataTable() {
                             type="search"
                         />
                     </div>
-                    <Dialog>
+                    <AddOrgPopup />
+                    {/* <Dialog>
                         <DialogTrigger>
                             <Button size="sm" variant="outline">
                                 <PlusIcon className="h-4 w-4" />
@@ -41,7 +43,7 @@ export default function DataTable() {
                                 </DialogDescription>
                             </DialogHeader>
                         </DialogContent>
-                    </Dialog>
+                    </Dialog> */}
                     {/* <Button size="sm" variant="outline">
                         <PlusIcon className="h-4 w-4" />
                         <span className="sr-only">Add Organization</span>
