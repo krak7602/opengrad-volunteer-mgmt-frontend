@@ -12,16 +12,16 @@ export default function BottomNavBar() {
                 <HomeIcon className="h-6 w-6" />
                 {/* {/* <span className="text-xs">Home</span> */}
             </Link >
-            <Link
+            {/* <Link
                 className="flex flex-col items-center gap-1 text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                 href="#"
             >
                 <SearchIcon className="h-6 w-6" />
-                {/* <span className="text-xs">Discover</span> */}
-            </Link>
+                <span className="text-xs">Discover</span>
+            </Link> */}
             <Link
                 className="flex flex-col items-center gap-1 text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                href="#"
+                href="inbox"
             >
                 <InboxIcon className="h-6 w-6" />
                 {/* <span className="text-xs">Messages</span> */}

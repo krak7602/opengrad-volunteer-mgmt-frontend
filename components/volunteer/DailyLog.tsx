@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table"
 import {
@@ -20,87 +21,114 @@ import { PopoverTrigger, PopoverContent, Popover } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible"
 import { Textarea } from "@/components/ui/textarea"
+import { TimePicker12Demo } from '../ui/time-picker-12h-demo';
+import { format } from "date-fns"
 
 export default function DailyLog() {
     const [numSlots, setNumSlots] = useState(1);
     const handleIncreaseCards = () => {
         setNumSlots(numSlots + 1);
     };
+    const [date1, setDate1] = useState<Date>();
+    const [date2, setDate2] = useState<Date>();
+    const [date3, setDate3] = useState<Date>();
+
     return (
+        // <div className="container mx-auto my-6 px-4 sm:px-6 lg:px-8">
+        //     <div className="flex flex-col sm:flex-row items-start justify-between mb-2">
+        //         <h1 className="text-2xl pb-6 font-bold">Assigned Mentees</h1>
+        //     </div>
         <div>
             <Card className="w-full max-w-2xl border-transparent">
-                <CardHeader>
-                    <CardTitle>Daily Work Log</CardTitle>
-                    <CardDescription>Log your daily activities and time spent.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {/* <form className="grid gap-4"> */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
-                        <div>
-                            <Label htmlFor="date">Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button className="w-full justify-start text-left font-normal" id="date" variant="outline">
-                                        <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-                                        <span>Select date</span>
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent align="start" className="w-auto p-0">
-                                    <Calendar initialFocus mode="single" />
-                                </PopoverContent>
-                            </Popover>
+                <div className="container mx-auto my-6 px-4 sm:px-6 lg:px-8">
+                    <CardHeader className="p-0 pb-4">
+                        <CardTitle className="text-2xl pb-1 font-bold">Daily Work Log</CardTitle>
+                        <CardDescription>Log your daily activities and time spent.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        {/* <form className="grid gap-4"> */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+                            <div>
+                                <Label htmlFor="date">Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                " w-full md:w-[280px] justify-start text-left font-normal",
+                                                !date1 && "text-muted-foreground"
+                                            )}
+                                        >
+                                            {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
+                                            <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
+                                            {date1 ? format(date1, "PPP") : <span>Select a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent align="start" className="w-auto p-0">
+                                        <Calendar initialFocus mode="single" selected={date1} onSelect={setDate1} />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid gap-4">
-                        {Array.from({ length: numSlots }, (_, index) => (
-                            <Collapsible className="grid gap-4">
-                                <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
-                                    Time Period {index + 1}
-                                    <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div>
-                                            <Label htmlFor="start-time">Start Time</Label>
-                                            <Input id="start-time" type="time" />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="end-time">End Time</Label>
-                                            <Input id="end-time" type="time" />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <Label htmlFor="activity">Activity</Label>
-                                            <Textarea className="min-h-[100px]" id="activity" placeholder="Describe your activity" />
-                                        </div>
-                                        <div className="md:col-span-4">
+                        <div className="grid gap-4">
+                            {Array.from({ length: numSlots }, (_, index) => (
+                                <Collapsible className="gap-6">
+                                    <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
+                                        Time Period {index + 1}
+                                        <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent>
+                                        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
+                                        <div className="flex-wrap flex-col pl-1">
+                                            <div className=" flex flex-wrap">
+                                                <div className="py-3 md:px-5">
+                                                    <Label htmlFor="start-time">Start Time</Label>
+                                                    <TimePicker12Demo date={date2} setDate={setDate2} />
+                                                    {/* <Input id="start-time" type="time" /> */}
+                                                </div>
+                                                <div className="py-3 md:px-5">
+                                                    <Label htmlFor="end-time">End Time</Label>
+                                                    <TimePicker12Demo date={date3} setDate={setDate3} />
+                                                    {/* <Input id="end-time" type="time" /> */}
+                                                </div>
+                                            </div>
+
+                                            <div className="col-span-2 py-3">
+                                                <Label htmlFor="activity">Activity</Label>
+                                                <Textarea className="min-h-[100px] min-w-max" id="activity" placeholder="Describe your activity" />
+                                            </div>
+                                            {/* <div className="md:col-span-4">
                                             <Label htmlFor="time-spent">Time Spent</Label>
                                             <Input id="time-spent" readOnly type="text" />
+                                        </div> */}
                                         </div>
-                                    </div>
-                                </CollapsibleContent>
-                            </Collapsible>
-                        ))}
-                        {numSlots>1 && <Button className="flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={() => setNumSlots(numSlots - 1)} variant="outline">
-                            {/* <PlusIcon className="h-4 w-4" /> */}
-                            Delete Time Period
-                        </Button>}
-                        <Button className="flex items-center justify-center gap-2" onClick={() => setNumSlots(numSlots + 1)} variant="outline">
-                            <PlusIcon className="h-4 w-4" />
-                            Add Time Period
-                        </Button>
-                        <div className="time-periods grid gap-4" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            ))}
+                            {numSlots > 1 && <Button className="flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={() => setNumSlots(numSlots - 1)} variant="outline">
+                                {/* <PlusIcon className="h-4 w-4" /> */}
+                                Delete Time Period
+                            </Button>}
+                            <Button className="flex items-center justify-center gap-2" onClick={() => setNumSlots(numSlots + 1)} variant="outline">
+                                <PlusIcon className="h-4 w-4" />
+                                Add Time Period
+                            </Button>
+                            <div className="time-periods grid gap-4" />
+                        </div>
+                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="total-time">Total Time Spent</Label>
                             <Input id="total-time" readOnly type="text" />
                         </div>
-                    </div>
-                    {/* </form> */}
-                </CardContent>
-                <CardFooter>
-                    <Button type="submit">Submit</Button>
-                </CardFooter>
+                    </div> */}
+                        {/* </form> */}
+                    </CardContent>
+                    <CardFooter className="p-0">
+                        <Button type="submit">Submit</Button>
+                    </CardFooter>
+                </div>
+                {/* <Card className="container mx-auto my-6 px-4 sm:px-6 lg:px-8"> */}
+
             </Card>
         </div>
 

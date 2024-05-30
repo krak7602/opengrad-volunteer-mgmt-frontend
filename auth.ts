@@ -17,7 +17,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 // const params = (request.url.toString());
                 const url = new URL(request.url)
                 const params = url.searchParams
-                console.log("Params: ", params)
+                // const cred = {email: params}
+                const cred = {email: params.get("email"), password: params.get("password")}
 
                 user = {
                     email: "email1@gmail.com",
@@ -25,9 +26,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     role: "volunteer"
                 }
                 // const cred = await signInSchema.parseAsync(credentials)
-                console.log("Credentials:", credentials.email)
-                // console.log("Credentials email:", cred)
-                if (!user) {
+                // console.log("Credentials:", cred)
+                // console.log("Params:", params)
+                
+                // console.log(cred.email)
+                // console.log("Credentials email:", cred.email)
+                // console.log("Cred password: ", cred.password)
+
+                if (cred.email != user.email || cred.password != user.password) {
                     throw new Error("User not found.")
                 }
                 // console.log("Cred: " , credentials.email)
