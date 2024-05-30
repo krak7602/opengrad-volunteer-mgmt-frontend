@@ -43,7 +43,7 @@ export default function SignIn() {
 
     async function onSubmit(values: z.infer<typeof signInSchema>) {
         // await signIn("credentials", { values, redirect: false })
-        await signIn("credentials", { redirect: false }, values)
+        await signIn("credentials", { redirect: false}, values)
         router.push("/dashboard")
     }
 
