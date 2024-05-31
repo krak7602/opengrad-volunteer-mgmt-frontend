@@ -117,7 +117,7 @@ export default auth((req) => {
     console.log("NEXT_PUBLIC_ROOT_DOMAIN:",process.env.NEXT_PUBLIC_ROOT_DOMAIN )
     if (!req.auth) {
         if (path !== '/volunteer/login' && path !== '/volunteer/setup') {
-            return NextResponse.redirect(new URL(`/volunteer/login`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+            return NextResponse.redirect(new URL(`/volunteer/login`, `http://${hostname}`))
         }
         // if (path == '/volunteer/login') {
         //     return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
@@ -128,12 +128,12 @@ export default auth((req) => {
 
     if (req.auth) {
         if (path == "/volunteer/login") {
-            return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+            return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${hostname}`))
         }
             if (path == "/") {
-                return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+                return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${hostname}`))
             }
-            let puthURL = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
+            let puthURL = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${hostname}`);
             return NextResponse.rewrite(puthURL.href)
     }
 
