@@ -124,7 +124,7 @@ export default auth((req) => {
     }
 
     if (req.auth) {
-        if (path == "/login") {
+        if (path == "/volunteer/login") {
             return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
         }
             if (path == "/") {
