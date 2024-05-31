@@ -113,14 +113,14 @@ export default auth((req) => {
     // Vercel changes
     // -----
     if (!req.auth) {
-        if (path !== '/login' && path !== '/setup') {
+        if (path !== '/volunteer/login' && path !== '/volunteer/setup') {
             return NextResponse.redirect(new URL(`/volunteer/login`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
         }
-        if (path == '/login') {
-            return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
-        } else if (path == '/setup') {
-            return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
-        }
+        // if (path == '/volunteer/login') {
+        //     return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
+        // } else if (path == '/setup') {
+        //     return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
+        // }
     }
 
     if (req.auth) {
