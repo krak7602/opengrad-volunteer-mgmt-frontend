@@ -110,21 +110,70 @@ export default auth((req) => {
     //     }
     // }
 
+    //---
+    // if (!req.auth) {
+    //     if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
+    //         hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
+    //         hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+    //     ) {
+    //         if (path !== '/login' && path !== '/setup') {
+    //             return NextResponse.redirect(new URL(`/login`, `http://${hostname}`))
+    //         }
+    //         if (path == '/login') {
+    //             if (hostname == `admin.${hostname}`) {
+    //                 return NextResponse.rewrite(new URL(`/admin/login`, req.url))
+    //             } else if (hostname == `partner.${hostname}`) {
+    //                 return NextResponse.rewrite(new URL(`/partner/login`, req.url))
+    //             } else if (hostname == `volunteer.${hostname}`) {
+    //                 return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
+    //             }
+    //         } else if (path == '/setup') {
+    //             if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+    //                 return NextResponse.rewrite(new URL(`/admin/setup`, req.url))
+    //             } else if (hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+    //                 return NextResponse.rewrite(new URL(`/partner/setup`, req.url))
+    //             } else if (hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+    //                 return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
+    //             }
+    //         }
+
+    //     }
+    // }
+
+
+
+    // if (req.auth) {
+    //     if (path == "/login") {
+    //         return NextResponse.redirect(new URL(`/dashboard`, `http://${req.auth.user.role}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+    //     }
+    //     if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
+    //         hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
+    //         hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+    //     ) {
+    //         if (path == "/") {
+    //             return NextResponse.redirect(new URL(`/dashboard`, `http://${req.auth.user.role}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+    //         }
+    //         let puthURL = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
+    //         return NextResponse.rewrite(puthURL.href)
+    //     }
+    // }
+    //---
+
     // Vercel changes
     // -----
     console.log("Got to middleware")
     console.log("Hostname:", hostname)
     console.log("NEXT_PUBLIC_ROOT_DOMAIN:",process.env.NEXT_PUBLIC_ROOT_DOMAIN )
-    if (!req.auth) {
-        if (path !== '/volunteer/login' && path !== '/volunteer/setup') {
-            return NextResponse.redirect(new URL(`/volunteer/login`, `http://${hostname}`))
-        }
-        // if (path == '/volunteer/login') {
-        //     return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
-        // } else if (path == '/setup') {
-        //     return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
-        // }
-    }
+    // if (!req.auth) {
+    //     if (path !== '/volunteer/login' && path !== '/volunteer/setup') {
+    //         return NextResponse.redirect(new URL(`/volunteer/login`, `http://${hostname}`))
+    //     }
+    //     // if (path == '/volunteer/login') {
+    //     //     return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
+    //     // } else if (path == '/setup') {
+    //     //     return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
+    //     // }
+    // }
 
     if (req.auth) {
         if (path == "/volunteer/login") {
