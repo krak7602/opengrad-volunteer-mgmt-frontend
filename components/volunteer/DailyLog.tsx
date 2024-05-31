@@ -104,7 +104,7 @@ export default function DailyLog() {
         toast({
             description: "Your form has been submitted successfully"
         })
-        router.push('/dashboard')
+        router.push('/volunteer/dashboard')
     }
 
     interface slotItem {

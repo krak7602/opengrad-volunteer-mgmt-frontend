@@ -120,13 +120,17 @@ export default auth((req) => {
         } else if (path == '/setup') {
             return NextResponse.rewrite(new URL(`/volunteer/setup`, req.url))
         }
+        const vol_check = path.split("/")
+        if(vol_check[1]=="volunteer" && (vol_check[2]=="dashboard"|| vol_check[2]=="daily-log"||vol_check[2]=="inbox")) {
+            return NextResponse.redirect(new URL(`/volunteer/login`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+        }
 
     }
 
 
     if (req.auth) {
         if (path == "/volunteer/login") {
-            return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${req.auth.user.role}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+            return NextResponse.redirect(new URL(`/volunteer/dashboard`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
         }
         
         // let puthURL = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
