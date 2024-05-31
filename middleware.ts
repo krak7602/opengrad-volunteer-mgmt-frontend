@@ -112,6 +112,9 @@ export default auth((req) => {
 
     // Vercel changes
     // -----
+    console.log("Got to middleware")
+    console.log("Hostname:", hostname)
+    console.log("NEXT_PUBLIC_ROOT_DOMAIN:",process.env.NEXT_PUBLIC_ROOT_DOMAIN )
     if (!req.auth) {
         if (path !== '/volunteer/login' && path !== '/volunteer/setup') {
             return NextResponse.redirect(new URL(`/volunteer/login`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
