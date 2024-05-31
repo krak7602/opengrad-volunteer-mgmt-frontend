@@ -24,7 +24,7 @@ interface slotItem {
 export default function LogField({ handleSlotFieldChange, handleTimeChange, index }: { handleSlotFieldChange: (e: React.ChangeEvent<HTMLTextAreaElement>, index: number, field: string) => void, handleTimeChange: (value: string, index: number, field: string, pos:string) => void, index: number }) {
     return (
         <div>
-            <div>
+            <div className="pb-2 pt-1">
                 <Label htmlFor="slot-start" className="pb-1">Slot Start</Label>
                 <div className="flex items-end gap-2">
                     <div className="grid gap-1 text-center">
@@ -91,7 +91,7 @@ export default function LogField({ handleSlotFieldChange, handleTimeChange, inde
                 </div>
             </div>
 
-            <div>
+            <div className="pt-1">
                 <Label htmlFor="slot-end" className="pb-1">Slot End</Label>
                 <div className="flex items-end gap-2">
                     <div className="grid gap-1 text-center">
