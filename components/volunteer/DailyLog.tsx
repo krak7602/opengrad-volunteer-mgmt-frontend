@@ -13,22 +13,70 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+
 import { AddOrgForm } from "@/components/volunteer/AddOrgForm"
 import { AddOrgPopup } from "@/components/volunteer/AddOrgPopup"
 import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { PopoverTrigger, PopoverContent, Popover } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible"
 import { Textarea } from "@/components/ui/textarea"
 import { TimePicker12Demo } from '../ui/time-picker-12h-demo';
 import { format } from "date-fns"
+import { PopoverClose } from '@radix-ui/react-popover';
 
 export default function DailyLog() {
-    const [numSlots, setNumSlots] = useState(1);
-    const handleIncreaseCards = () => {
-        setNumSlots(numSlots + 1);
+    const [numSlots, setNumSlots] = useState(0);
+    const [formData, setFormData] = useState<slotItem[]>();
+    const [date, setDate] = useState<Date>();
+    const handleIncreaseSlots = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: string) => {
+        if (numSlots === 0) {
+            const handleData: slotItem[] = [
+                {
+                    id: numSlots,
+                    hour: "--",
+                    min: "--",
+                    activity: activity,
+                    details: ""
+                }]
+            setFormData(handleData)
+            setNumSlots(numSlots + 1)
+        } else {
+            const handleData = formData
+            handleData?.push({
+                id: numSlots,
+                hour: "--",
+                min: "--",
+                activity: activity,
+                details: ""
+            })
+            setFormData(handleData)
+            setNumSlots(numSlots + 1)
+        }
     };
+    const handleDecreaseSlots = () => {
+        if (numSlots > 0) {
+            const handleData = formData
+            handleData?.pop()
+            setFormData(handleData)
+        }
+    }
+
+    interface slotItem {
+        id: number,
+        hour: string,
+        min: string,
+        activity: string,
+        details: string,
+    }
+
+
+
     const [date1, setDate1] = useState<Date>();
     const [date2, setDate2] = useState<Date>();
     const [date3, setDate3] = useState<Date>();
@@ -40,74 +88,87 @@ export default function DailyLog() {
                 {/* <div className="text-xs text-gray-500">Log your daily activities and time spent.</div> */}
             </div>
             <div className="overflow-x-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
-                    <div>
-                        <Label htmlFor="date">Date</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        " w-full md:w-[280px] justify-start text-left font-normal",
-                                        !date1 && "text-muted-foreground"
-                                    )}
-                                >
-                                    {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
-                                    <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-                                    {date1 ? format(date1, "PPP") : <span>Select a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent align="start" className="w-auto p-0">
-                                <Calendar initialFocus mode="single" selected={date1} onSelect={setDate1} />
-                            </PopoverContent>
-                        </Popover>
+                <form>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+                        <div className='grid grid-cols-1 gap-4'>
+                            <Label htmlFor="date">Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant={"outline"}
+                                        className={cn(
+                                            " w-full md:w-[280px] justify-start text-left font-normal",
+                                            !date1 && "text-muted-foreground"
+                                        )}
+                                    >
+                                        {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
+                                        <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
+                                        {date ? format(date, "PPP") : <span>Select a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent align="start" className="w-auto p-0">
+                                    <PopoverClose>
+                                        <Calendar initialFocus mode="single" selected={date} onSelect={setDate} />
+                                    </PopoverClose>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                     </div>
-                </div>
-                <div className="grid gap-4">
-                    {Array.from({ length: numSlots }, (_, index) => (
-                        <Collapsible className="gap-6">
-                            <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
-                                Time Period {index + 1}
-                                <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
-                                <div className="flex-wrap flex-col pl-1">
-                                    <div className=" flex flex-wrap">
-                                        <div className="py-3 md:px-5">
-                                            <Label htmlFor="start-time">Start Time</Label>
-                                            <TimePicker12Demo date={date2} setDate={setDate2} />
-                                            {/* <Input id="start-time" type="time" /> */}
-                                        </div>
-                                        <div className="py-3 md:px-5">
-                                            <Label htmlFor="end-time">End Time</Label>
-                                            <TimePicker12Demo date={date3} setDate={setDate3} />
-                                            {/* <Input id="end-time" type="time" /> */}
-                                        </div>
-                                    </div>
+                    {date &&
+                        <div>
+                            {formData?.map((slot, index) => (
+                                // <div>Something</div>
+                                <Collapsible defaultOpen className="gap-6">
+                                    <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
+                                        Slot #{index + 1}: {slot.activity}
+                                        <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent>
+                                        Something
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            ))}
+                            {numSlots > 0 && <Button type="button" className="flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={() => setNumSlots(numSlots - 1)} variant="outline">
+                                {/* <PlusIcon className="h-4 w-4" /> */}
+                                Delete Time Period
+                            </Button>}
+                            <Popover>
+                                <PopoverTrigger>
+                                    <Button type="button" className="flex items-center justify-center gap-2" variant="outline">
+                                        <PlusIcon className="h-4 w-4" />
+                                        Add Time Period
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 flex flex-wrap">
+                                    <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Content Creation") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                        Content Creation
+                                    </PopoverClose>
+                                    <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Tech") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                        Tech
+                                    </PopoverClose>
+                                    <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Mentoring") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                        Mentoring
+                                    </PopoverClose>
+                                    <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Design/Marketing") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                        Design/Marketing
+                                    </PopoverClose>
+                                    <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Offline Outreach") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                        Offline Outreach
+                                    </PopoverClose>
+                                    <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Other") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                        Other
+                                    </PopoverClose>
+                                </PopoverContent>
+                            </Popover>
+                            <h1>numSlots: {numSlots}</h1>
+                        </div>
+                    }
+                </form>
 
-                                    <div className="col-span-2 py-3">
-                                        <Label htmlFor="activity">Activity</Label>
-                                        <Textarea className="min-h-[100px] min-w-max" id="activity" placeholder="Describe your activity" />
-                                    </div>
-                                    {/* <div className="md:col-span-4">
-                                            <Label htmlFor="time-spent">Time Spent</Label>
-                                            <Input id="time-spent" readOnly type="text" />
-                                        </div> */}
-                                </div>
-                            </CollapsibleContent>
-                        </Collapsible>
-                    ))}
-                    {numSlots > 1 && <Button className="flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={() => setNumSlots(numSlots - 1)} variant="outline">
-                        {/* <PlusIcon className="h-4 w-4" /> */}
-                        Delete Time Period
-                    </Button>}
-                    <Button className="flex items-center justify-center gap-2" onClick={() => setNumSlots(numSlots + 1)} variant="outline">
-                        <PlusIcon className="h-4 w-4" />
-                        Add Time Period
-                    </Button>
-                    <div className="time-periods grid gap-4" />
-                </div>
+
+
+
                 {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="total-time">Total Time Spent</Label>
@@ -286,3 +347,4 @@ function PlusIcon(props: { className: string }) {
         </svg>
     )
 }
+

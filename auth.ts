@@ -10,22 +10,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
     // console.log(req)
     // return 
     {
-        session: { strategy: "jwt" },
+        // secret: process.env.AUTH_SECRET,
+        
         providers: [
             Credentials({
                 credentials: {
-                    email: { label: "Email" },
+                    email: { label: "Email" , type:"email"},
                     password: { label: "Password", type: "password" },
                 },
-                authorize: async (credentials, request) => {
+                authorize: async (credentials) => {
                     let user = null
                     // const params = (request.url.toString());
-                    const url = new URL(request.url)
-                    const params = url.searchParams
-                    console.log("The creds:",credentials);
+                    // const url = new URL(request.url)
+                    // const params = url.searchParams
+                    // console.log("Params:", params)
+                    // const { email, password } = await signInSchema.parseAsync(credentials)
+                    // console.log("The creds:",credentials);
+                    // console.log("The email:",email);
+                    // console.log("The password:",password);
                     // const cred = {email: params}
-                    const cred = { email: params.get("email"), password: params.get("password") }
-
+                    // const cred = { email: params.get("email"), password: params.get("password") }
+                    const { email, password } = await signInSchema.parseAsync(credentials)
                     user = {
                         email: "email1@gmail.com",
                         password: "pass2#AA",
@@ -39,7 +44,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                     // console.log("Credentials email:", cred.email)
                     // console.log("Cred password: ", cred.password)
 
-                    if (cred.email != user.email || cred.password != user.password) {
+                    // if (cred.email != user.email || cred.password != user.password) {
+                    if (email != user.email || password != user.password) {
                         throw new Error("User not found.")
                     }
                     // console.log("Cred: " , credentials.email)

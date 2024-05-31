@@ -43,7 +43,15 @@ export default function SignIn() {
 
     async function onSubmit(values: z.infer<typeof signInSchema>) {
         // await signIn("credentials", { values, redirect: false })
-        await signIn("credentials", { redirect: false}, values)
+        const validatedFields = signInSchema.safeParse(values)
+        if (!validatedFields.success) {
+            return {error:"Invalid fields!"}
+        }
+        const {email, password} = validatedFields.data
+
+        await signIn("credentials", { email: email, password: password, redirect: false })
+
+        // await signIn("credentials", { redirect: false}, values)
         router.push("/dashboard")
     }
 
