@@ -93,13 +93,16 @@ export default auth((req) => {
     }
 
     if (req.auth) {
-        if (path == '/login') {
+        if (path == "/login") {
             return NextResponse.redirect(new URL(`/dashboard`, `http://${req.auth.user.role}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
         }
         if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
             hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
             hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
         ) {
+            if (path == "/") {
+                return NextResponse.redirect(new URL(`/dashboard`, `http://${req.auth.user.role}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`))
+            }
             let puthURL = new URL(`/${req.auth.user.role}${path === "/" ? "" : path}`, `http://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
             return NextResponse.rewrite(puthURL.href)
         }

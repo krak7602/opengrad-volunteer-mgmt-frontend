@@ -1,6 +1,7 @@
 import BottomNavBar from "@/components/volunteer/BottomNavBar"
 import SideNavBar from "@/components/volunteer/SideNavBar"
 import SessionWrapper from "@/components/SessionWrapper"
+import { Toaster } from "@/components/ui/toaster"
 
 export default function DashboardLayout({
     children,
@@ -18,6 +19,7 @@ export default function DashboardLayout({
                     </main>
                 </div>
             </div>
+            <Toaster />
         </SessionWrapper>
     )
 }
