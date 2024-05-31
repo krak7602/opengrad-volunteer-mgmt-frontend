@@ -40,35 +40,45 @@ export default function DailyLog() {
     const [formData, setFormData] = useState<slotItem[]>();
     const [date, setDate] = useState<Date>();
     const { toast } = useToast()
-    const handleSlotFieldChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>, index: number, field: string) => {
+    const handleSlotFieldChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number, field: string) => {
         const handleData = formData
         if (handleData) {
-            if (field == "hour") {
-                handleData[index].hour = e.target.value;
-            } else if (field == "min") {
-                handleData[index].min = e.target.value;
-            } else if (field == "details") {
+            if (field == "details") {
                 handleData[index].details = e.target.value;
             }
         }
+
     }
-    const handleTimeChange = (value: string, index: number, field: string) => {
+    const handleTimeChange = (value: string, index: number, field: string, pos: string) => {
         const handleData = formData
-        if (handleData) {
-            if (field == "hour") {
-                handleData[index].hour = value;
-            } else if (field == "min") {
-                handleData[index].min = value;
+        if (pos == "start") {
+            if (handleData) {
+                if (field == "hour") {
+                    handleData[index].hourStart = value;
+                } else if (field == "min") {
+                    handleData[index].minStart = value;
+                }
+            }
+        } else if (pos == "end") {
+            if (handleData) {
+                if (field == "hour") {
+                    handleData[index].hourEnd = value;
+                } else if (field == "min") {
+                    handleData[index].minEnd = value;
+                }
             }
         }
+
     }
     const handleIncreaseSlots = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: string) => {
         if (numSlots === 0) {
             const handleData: slotItem[] = [
                 {
                     id: numSlots,
-                    hour: "--",
-                    min: "--",
+                    hourStart: "--",
+                    minStart: "--",
+                    hourEnd: "--",
+                    minEnd: "--",
                     activity: activity,
                     details: ""
                 }]
@@ -78,8 +88,10 @@ export default function DailyLog() {
             const handleData = formData
             handleData?.push({
                 id: numSlots,
-                hour: "--",
-                min: "--",
+                hourStart: "--",
+                minStart: "--",
+                hourEnd: "--",
+                minEnd: "--",
                 activity: activity,
                 details: ""
             })
@@ -109,20 +121,14 @@ export default function DailyLog() {
 
     interface slotItem {
         id: number,
-        hour: string,
-        min: string,
+        hourStart: string,
+        minStart: string,
+        hourEnd: string,
+        minEnd: string,
         activity: string,
         details: string,
     }
 
-
-    const demoSlot: slotItem = {
-        id: 0,
-        hour: "01",
-        min: "02",
-        activity: "Tech",
-        details: "This is the details"
-    }
     const [date1, setDate1] = useState<Date>();
     const [date2, setDate2] = useState<Date>();
     const [date3, setDate3] = useState<Date>();
