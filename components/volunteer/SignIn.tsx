@@ -52,7 +52,7 @@ export default function SignIn() {
         await signIn("credentials", { email: email, password: password, redirect: false })
 
         // await signIn("credentials", { redirect: false}, values)
-        router.push("/dashboard")
+        router.push("/volunteer/dashboard")
     }
 
     async function togglePasswordVisiblity() {

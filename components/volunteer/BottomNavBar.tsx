@@ -7,7 +7,7 @@ export default function BottomNavBar() {
         <div className="fixed bottom-0 left-0 z-10 flex w-full items-center justify-around border-t bg-gray-100 p-2 dark:border-gray-800 dark:bg-gray-950 lg:hidden">
             <Link
                 className="flex flex-col items-center gap-1 text-gray-500 transition-colors hover:text-gray-900  dark:text-gray-400 dark:hover:text-gray-50"
-                href="/dashboard"
+                href="/volunteer/dashboard"
             >
                 <HomeIcon className="h-6 w-6" />
                 {/* {/* <span className="text-xs">Home</span> */}
@@ -21,14 +21,14 @@ export default function BottomNavBar() {
             </Link> */}
             <Link
                 className="flex flex-col items-center gap-1 text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                href="inbox"
+                href="/volunteer/inbox"
             >
                 <InboxIcon className="h-6 w-6" />
                 {/* <span className="text-xs">Messages</span> */}
             </Link>
             <Link
                 className="flex flex-col items-center gap-1 text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                href="/daily-log"
+                href="/volunteer/daily-log"
             >
                 <AddIcon className="h-6 w-6" />
                 {/* <span className="text-xs">Daily Log</span> */}
