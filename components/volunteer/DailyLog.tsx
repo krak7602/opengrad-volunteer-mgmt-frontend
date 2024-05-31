@@ -173,7 +173,7 @@ export default function DailyLog() {
                                 <div>
                                     {formData?.map((slot, index) => (
                                         // <div>Something</div>
-                                        <Collapsible defaultOpen className="gap-6">
+                                        <Collapsible key={index} defaultOpen className="gap-6">
                                             <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
                                                 Slot #{index + 1}: {slot.activity}
                                                 <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
