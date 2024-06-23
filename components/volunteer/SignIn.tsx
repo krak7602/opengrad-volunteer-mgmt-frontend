@@ -31,12 +31,15 @@ import { ForgotPasswordPopup } from "@/components/volunteer/ForgotPasswordPopup"
 
 export default function SignIn() {
     const router = useRouter()
+    let curl = window.location.href
+    let curRole = curl.split("//")[1].split(".")[0]
     const [showPassword, setShowPassword] = React.useState(false)
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
             email: "",
             password: "",
+            role: curRole,
         },
     })
 
@@ -47,12 +50,12 @@ export default function SignIn() {
         if (!validatedFields.success) {
             return {error:"Invalid fields!"}
         }
-        const {email, password} = validatedFields.data
+        const {email, password, role} = validatedFields.data
 
-        await signIn("credentials", { email: email, password: password, redirect: false })
+        await signIn("credentials", { email: email, password: password, role: role, redirect: false })
 
         // await signIn("credentials", { redirect: false}, values)
-        router.push("/volunteer/dashboard")
+        router.push("/dashboard")
     }
 
     async function togglePasswordVisiblity() {
@@ -119,7 +122,7 @@ export default function SignIn() {
                                         <FormControl>
                                             <div>
                                                 <Input placeholder="" {...field} required type={showPassword ? "text" : "password"} />
-                                                <Button className="absolute top-9 right-1 h-7 w-7" size="icon" variant="ghost" onClick={togglePasswordVisiblity}>
+                                                <Button type="button" className="absolute top-9 right-1 h-7 w-7" size="icon" variant="ghost" onClick={togglePasswordVisiblity}>
                                                     <EyeIcon className={showPassword ? "visible h-4 w-4" : "hidden"} />
                                                     <EyeSlashIcon className={showPassword ? "hidden" : "visible h-4 w-4"} />
                                                     <span className="sr-only">Toggle password visibility</span>

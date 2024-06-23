@@ -1,3 +1,6 @@
+import Feedback from "@/components/volunteer/Feedback"
+
+
 export default function Page({
     params,
     searchParams,
@@ -6,6 +9,8 @@ export default function Page({
     searchParams: { [key: string]: string | string[] | undefined }
 }) {
     return (
-            <h1>Admin Dashboard page</h1>
-        )
+        <div>
+            <Feedback feedbackId={params.slug}/>
+        </div>
+    )
 }

@@ -33,10 +33,155 @@ import { format } from "date-fns"
 import { PopoverClose } from '@radix-ui/react-popover';
 import LogField from '@/components/volunteer/LogField';
 import { useToast } from "@/components/ui/use-toast"
-import { columns } from "@/components/volunteer/logColumn"
-import { LogTable } from "@/components/volunteer/logTable"
+import { columns } from "@/components/volunteer/logColumn" // Not needed
+import { LogTable } from "@/components/volunteer/logTable" // Not needed
 
-export default function DailyLog() {
+export default function FeedbackForm() {
+    interface FeedbackItem {
+        id: number,
+        type: string,
+        question: string,
+        option_count: number,
+        option1: string,
+        option2: string,
+        option3: string,
+        option4: string, 
+    }
+    const [numFields, setNumFields] = useState(0);
+    
+    const [formData, setFormData] = useState<FeedbackItem[]>();
+    const formSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // console.log(demoSlot)
+        console.log(formData?.map((slot, index) => (slot)))
+
+        toast({
+            description: "Your form has been submitted successfully"
+        })
+
+        const dayBuf: logDay = {
+            date: date,
+            slots: formData
+        }
+
+        const dayBufArr: logDay[] = [];
+        dayBufArr.push(dayBuf)
+        dayBufArr.push(dayBuf)
+
+
+
+        // const dayLog: logDay = {
+        //     date: date,
+        //     slots: formData
+        // }
+
+        // const logHis = logData;
+        // logHis?.logs.push(dayLog);
+        console.log("Daybuf:", dayBuf)
+        console.log("JSON:", JSON.stringify(dayBuf))
+        console.log("Fuul:", JSON.stringify(dayBufArr))
+        //     fs.writeFile('logHis.json', JSON.stringify(dayBuf), (err) => {
+        //         if (err) {
+        //             console.log('Error writing file:', err);
+        //         } else {
+        //             console.log('Successfully wrote file');
+        //         }
+        //     });
+        router.push('/dashboard')
+    }
+
+    // <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+    //                 <div className='grid grid-cols-1 gap-4'>
+    //                     <Label htmlFor="date">Date</Label>
+    //                     <Popover>
+    //                         <PopoverTrigger asChild>
+    //                             <Button
+    //                                 type="button"
+    //                                 variant={"outline"}
+    //                                 className={cn(
+    //                                     " w-full md:w-[280px] justify-start text-left font-normal",
+    //                                     !date && "text-muted-foreground"
+    //                                 )}
+    //                             >
+    //                                 {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
+    //                                 <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
+    //                                 {date ? format(date, "PPP") : <span>Select a date</span>}
+    //                             </Button>
+    //                         </PopoverTrigger>
+    //                         <PopoverContent align="start" className="w-auto p-0">
+    //                             <PopoverClose>
+    //                                 <Calendar initialFocus mode="single" selected={date} onSelect={setDate} />
+    //                             </PopoverClose>
+    //                         </PopoverContent>
+    //                     </Popover>
+    //                 </div>
+    //             </div>
+
+    return (
+
+        <div className="overflow-x-auto px-1 pt-2">
+            <form onSubmit={formSubmit}>
+                
+                <div>
+                    {formData?.map((item, index) => (
+                        // <div>Something</div>
+                            <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={index} />
+                        // <Collapsible key={index} defaultOpen className="gap-6">
+                        //     <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
+                        //         Slot #{index + 1}: {slot.activity}
+                        //         <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
+                        //     </CollapsibleTrigger>
+                        //     <CollapsibleContent>
+                        //         <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={index} />
+                        //     </CollapsibleContent>
+                        // </Collapsible>
+                    ))}
+                    <div className="flex">
+                        {numFields > 0 && <Button type="button" className="mr-3 flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={(e) => { handleDecreaseSlots(e) }} variant="outline">
+                            <RemoveIcon className="h-4 w-4 text-white" />
+                            Delete Field
+                        </Button>}
+                        <Popover>
+                            <PopoverTrigger>
+                                <Button type="button" className="flex items-center justify-center gap-2" variant="outline">
+                                    <PlusIcon className="h-4 w-4 text-black" />
+                                    Add Field
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 flex flex-wrap">
+                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Text") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                    Text
+                                </PopoverClose>
+                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Options") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                    Options
+                                </PopoverClose>
+                                
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+
+                    {/* <h1>numSlots: {numSlots}</h1> */}
+                    {/* <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={0} /> */}
+                </div>
+                <div>
+                    <Button type='submit' className="my-2">Submit</Button>
+                </div>
+            </form>
+
+
+
+
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="total-time">Total Time Spent</Label>
+                            <Input id="total-time" readOnly type="text" />
+                        </div>
+                    </div> */}
+        </div>
+    )
+}
+
+export function DailyLog() {
     const router = useRouter()
     const [numSlots, setNumSlots] = useState(0);
     const [formData, setFormData] = useState<slotItem[]>();
@@ -206,7 +351,7 @@ export default function DailyLog() {
     return (
         <div className="container mx-auto my-6 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row items-start justify-between mb-2 pb-4">
-                <h1 className="text-2xl pb-1 font-bold">Daily Log</h1>
+                <h1 className="text-2xl pb-1 font-bold">Daily Log </h1>
                 {/* <div className="text-xs text-gray-500">Log your daily activities and time spent.</div> */}
             </div>
             <Tabs defaultValue="new-log" className="w-full">

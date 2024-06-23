@@ -9,6 +9,9 @@ export const signInSchema = z.object({
         const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':",./<>?|\\ ]/.test(value);
         return hasUppercase && hasLowercase && hasNumber && hasSpecialChar;
     }, 'Password must contain at least one uppercase letter, lowercase letter, number, and special character'),
+    role: z.string().refine((value) => {
+        if(value==='admin'|| value==='partner' || value==='volunteer') return true;
+    }, "Not a valid role"),
 })
 
 export const passwordResetSchema = z.object({

@@ -30,7 +30,7 @@ function OpengradIcon(props: { className: string }) {
         <Image
             className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
             src="/opengrad.svg"
-            alt="Next.js Logo"
+            alt="Opengrad logo"
             width={160}
             height={60}
             priority
