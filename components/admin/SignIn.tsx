@@ -28,21 +28,21 @@ import { signInSchema } from "@/lib/zod"
 import { ForgotPasswordPopup } from "@/components/volunteer/ForgotPasswordPopup"
 // import { setAuthState, IAuthState } from "@/lib/authSlice";
 // import { useAppDispatch } from "@/lib/store";
+import axios from "axios";
 
 
-
-export default function SignIn() {
+export default function SignIn({ curRole }: { curRole: string }) {
     const router = useRouter()
     // const dispatch = useAppDispatch();
-    let curl = window.location.href
-    let curRole = curl.split("//")[1].split(".")[0]
+    // let curl = window.location.href
+    // let curRole = curl.split("//")[1].split(".")[0]
     const [showPassword, setShowPassword] = React.useState(false)
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
             email: "",
             password: "",
-            role: curRole
+            role: curRole,
         },
     })
 
@@ -55,6 +55,15 @@ export default function SignIn() {
         }
         const { email, password, role } = validatedFields.data
 
+        // const resp = await axios.post(
+        axios.post(
+            `http://localhost:5001/auth/login`,
+            {
+                "email": email,
+                "password": password,
+            },
+            { withCredentials: true }
+        ).then((resp) => console.log("The cookie found:",resp.headers["set-cookie"]))
         // dispatch(setAuthState({
         //     authState: true,
         //     userId: "101",

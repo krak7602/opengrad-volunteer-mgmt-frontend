@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation"
 import { NextApiRequest, NextApiResponse } from "next"
 import useFetch from 'react-fetch-hook';
 import axios from "axios";
+import { setCookie } from 'cookies-next';
+import { cookies } from "next/headers"
 
 
 
@@ -22,7 +24,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                     email: { label: "Email", type: "email" },
                     password: { label: "Password", type: "password" },
                     role: { label: "Role", type: "text" },
-                    id: {label: "Id"}
+                    id: { label: "Id" }
                 },
                 authorize: async (credentials) => {
                     // let user = null
@@ -63,20 +65,58 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                             {
                                 "email": email,
                                 "password": password,
-                            }
-                            // { withCredentials: true }
+                            },
+                            { withCredentials: true }
                         );
+                        const cookie = resp.headers["set-cookie"]
+                        console.log("The cookie found:", cookie)
+                        if(cookie) {
+                            const [nameValue, ...options] = cookie[0].split('; ');
+                            const [name, value] = nameValue.split('=');
+
+                            // Initialize options object
+                            // const cookieOptions:{path:string,expires:Date, httpOnly: boolean} ;
+
+                            // Parse options
+                            // options.forEach(option => {
+                            //     const [key, val] = option.split('=');
+                            //     switch (key.toLowerCase()) {
+                            //         case 'path':
+                            //             cookieOptions.path = val;
+                            //             break;
+                            //         case 'expires':
+                            //             cookieOptions.expires = new Date(val);
+                            //             break;
+                            //         case 'httponly':
+                            //             cookieOptions.httpOnly = true;
+                            //             break;
+                            //         // Add other options as needed (e.g., Secure, SameSite, etc.)
+                            //     }
+                            // });
+                            // cookies().set(name, value, {path: "/", httpOnly: true})
+                            // const full = cookies().get(name)
+                            // const val = full?.name+"="+full?.value
+                            console.log("The cookie for axios:",cookie[0])
+                            localStorage.setItem("authCookie", cookie[0])
+                            // Set the cookie
+                            // setCookie(name, value, {
+                                // res: resp,
+
+                                
+                            // });
+                        }
+
                         // console.log("This is the data:",resp.data)
                         console.log(resp.data)
-                        if(resp.data.message === "User logged in") {
-                            return { email: email, password: password, role: role, auth_id: resp.data.user.id}
+                        if (resp.data.message === "User logged in") {
+                            return { email: email, password: password, role: role, auth_id: resp.data.user.id }
                         }
-                    } catch(e) {
+                    } catch (e) {
                         console.log(e)
                     }
-                    
 
-                    
+
+
                     // user = {
                     //     email: "email1@gmail.com",
                     //     password: "pass2#AA",

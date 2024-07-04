@@ -4,13 +4,13 @@ import { columns, partnerColumn } from "@/components/admin/PartnerColumn"
 import { auth } from "@/auth"
 // import { useAppSelector } from "@/lib/store";
 import { useSession, SessionProvider } from 'next-auth/react'
-import { useFetch, useListState } from "@mantine/hooks"
+import {  useListState } from "@mantine/hooks"
+import { useFetch } from "@/lib/useFetch"
 import { title } from '@/lib/atoms'
 import { useAtom } from "jotai";
 import { useEffect } from "react"
 
 export default function PartnerListing() {
-
     interface poc {
         id: number,
         user_id: user_id,
@@ -26,6 +26,8 @@ export default function PartnerListing() {
     const { data, loading, error, refetch, abort } = useFetch<poc[]>(
         `http://localhost:5001/user/get/poc`
     );
+
+
 
     const dat: partnerColumn[] = [{ id: "101", name: "NIT" }, { id: "102", name: "IIT" }]
     // const authData = useAppSelector((state) => state.auth);

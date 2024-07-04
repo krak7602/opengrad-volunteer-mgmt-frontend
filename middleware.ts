@@ -55,14 +55,17 @@ export const config = {
 
 export default auth((req) => {
     const url = req.nextUrl;
+    console.log("the req;",req.url,"///////////")
+    // console.log("Ithanu url:",url)
     let hostname = req.headers
         .get("host")!
         .replace(".localhost:3000", `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
     const searchParams = req.nextUrl.searchParams.toString();
     const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ""}`;
+    const role = hostname.split(".")[0]
     // console.log("Pona host:" ,hostname)
     // console.log("Pona path:", path)
-
+    console.log("The auth:",req.auth)
     if (!req.auth) {
         if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
             hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
@@ -73,11 +76,11 @@ export default auth((req) => {
             }
             if (path == '/login') {
                 if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-                    return NextResponse.rewrite(new URL(`/admin/login`, req.url))
+                    return NextResponse.rewrite(new URL(`/admin/login?role=${role}`, req.url))
                 } else if (hostname == `partner.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-                    return NextResponse.rewrite(new URL(`/partner/login`, req.url))
+                    return NextResponse.rewrite(new URL(`/partner/login?role=${role}`, req.url))
                 } else if (hostname == `volunteer.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-                    return NextResponse.rewrite(new URL(`/volunteer/login`, req.url))
+                    return NextResponse.rewrite(new URL(`/volunteer/login?role=${role}`, req.url))
                 }
             } else if (path == '/setup') {
                 if (hostname == `admin.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
