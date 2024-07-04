@@ -4,6 +4,10 @@ import { useToast } from "@/components/ui/use-toast"
 import { signInSchema } from "@/lib/zod"
 import { useSearchParams } from "next/navigation"
 import { NextApiRequest, NextApiResponse } from "next"
+import useFetch from 'react-fetch-hook';
+import axios from "axios";
+
+
 
 
 export const { handlers, signIn, signOut, auth } = NextAuth(
@@ -17,13 +21,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                 credentials: {
                     email: { label: "Email", type: "email" },
                     password: { label: "Password", type: "password" },
-                    role: { label: "Role", type: "text" }
+                    role: { label: "Role", type: "text" },
+                    id: {label: "Id"}
                 },
                 authorize: async (credentials) => {
                     // let user = null
                     let volunteer1 = null
                     let partner1 = null
                     let admin1 = null
+                    // const {  data, error } = useFetch(`${process.env.API_BASE_URL}auth/login`);
+
                     // const params = (request.url.toString());
                     // const url = new URL(request.url)
                     // const params = url.searchParams
@@ -50,6 +57,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                         password: "admi2#AA",
                         role: "admin"
                     }
+                    try {
+                        const resp = await axios.post(
+                            `http://localhost:5001/auth/login`,
+                            {
+                                "email": email,
+                                "password": password,
+                            }
+                            // { withCredentials: true }
+                        );
+                        // console.log("This is the data:",resp.data)
+                        console.log(resp.data)
+                        if(resp.data.message === "User logged in") {
+                            return { email: email, password: password, role: role, auth_id: resp.data.user.id}
+                        }
+                    } catch(e) {
+                        console.log(e)
+                    }
+                    
+
+                    
                     // user = {
                     //     email: "email1@gmail.com",
                     //     password: "pass2#AA",
@@ -72,6 +99,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                         if (email != admin1.email || password != admin1.password) {
                             throw new Error("Adminstrator account not found.")
                         }
+
                     }
                     if (role === "partner") {
                         if (email != partner1.email || password != partner1.password) {
@@ -99,19 +127,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                     // }
 
                     // return user object with the their profile data
-                    return {email:email, password:password, role:role}
+                    return { email: email, password: password, role: role }
                 },
             }),
         ],
         callbacks: {
             async jwt({ token, user }) {
                 // const Exteduser: ExtendedUser = user;
-                if (user) token.role = user.role;
+                if (user) {
+                    token.role = user.role;
+                    token.auth_id = user.auth_id;
+                }
                 return token;
             },
             async session({ session, token }) {
                 if (session?.user) {
                     session.user.role = token.role;
+                    session.user.auth_id = token.auth_id;
                 }
                 return session;
             },

@@ -54,6 +54,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { columns } from "@/components/volunteer/logColumn" // Not needed
 import { LogTable } from "@/components/volunteer/logTable" // Not needed
 import Question from '@/components/admin/Question';
+import axios from "axios"
 
 export default function FeedbackForm() {
     interface FeedbackItem {
@@ -64,6 +65,7 @@ export default function FeedbackForm() {
     }
 
     interface Feedback {
+        title: string,
         recipientType: string,
         recipientCount: number,
         recipientList: partner[] | cohort[],
@@ -75,6 +77,7 @@ export default function FeedbackForm() {
     const [questionCount, setQuestionCount] = useState(0);
     const [cohortAdd, setCohortAdd] = useState(false);
     const [partnerAdd, setPartnerAdd] = useState(true);
+    const [feedbackTitle, setFeedbackTitle] = useState("")
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("")
     const [recipientCohortCount, setRecipientCohortCount] = useState(0)
@@ -343,11 +346,45 @@ export default function FeedbackForm() {
     }
 
     // const [formData, setFormData] = useState<FeedbackItem[]>();
-    const formSubmit = (e: React.FormEvent) => {
+    const formSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (recipientPartnerCount != 0) {
+            try {
+                if (questionCount != 0) {
+                    const resp = await axios.post(
+                        `http://localhost:5001/forms/create`,
+                        {
+                            "receipientType": "poc",
+                            "receipientId": [1, 2],
+                            "feedbackItemCount": recipientPartnerCount,
+                            "feedbackItems": questions,
+                        }
+                        // { withCredentials: true }
+                    );
+                    if (resp.data.id) {
+                        const resp2 = await axios.post(
+                            `http://localhost:5001/notification/poc/create`,
+                            {
+                                "typeofnotification": "form",
+                                "Message": feedbackTitle,
+                                "form_id": resp.data.id,
+                                "receipient_id": [1, 2]
+                            }
+                            // { withCredentials: true }
+                        );
+                    }
+
+
+                    console.log("The error is this:", resp.data)
+                }
+                // console.log("This is the data:",resp.data)
+            } catch (e) {
+                console.log(e)
+            }
+
             const feedback: Feedback = {
+                title: feedbackTitle,
                 recipientType: "partner",
                 recipientCount: recipientPartnerCount,
                 recipientList: recipientPartners,
@@ -356,7 +393,39 @@ export default function FeedbackForm() {
             }
             console.log(feedback)
         } else if (recipientCohortCount != 0) {
+            try {
+                if (questionCount != 0) {
+                    const resp = await axios.post(
+                        `http://localhost:5001/forms/create`,
+                        {
+                            "receipientType": "cohort",
+                            "receipientId": [1, 2],
+                            "feedbackItemCount": recipientCohortCount,
+                            "feedbackItems": questions,
+                        }
+                        // { withCredentials: true }
+                    );
+                    if (resp.data.id) {
+                        const resp2 = await axios.post(
+                            `http://localhost:5001/notification/cohort/create`,
+                            {
+                                "typeofnotification": "form",
+                                "Message": feedbackTitle,
+                                "form_id": resp.data.id,
+                                "receipient_id": [1, 2]
+                            }
+                            // { withCredentials: true }
+                        );
+                    }
+
+                    console.log("The error is this:", resp.data)
+                }
+                // console.log("This is the data:",resp.data)
+            } catch (e) {
+                console.log(e)
+            }
             const feedback: Feedback = {
+                title: feedbackTitle,
                 recipientType: "cohort",
                 recipientCount: recipientCohortCount,
                 recipientList: recipientCohorts,
@@ -494,6 +563,7 @@ export default function FeedbackForm() {
 
         <div className="overflow-x-auto px-1 pt-2">
             <form onSubmit={formSubmit} className="flex flex-col gap-2">
+                <Textarea onChange={(e) => setFeedbackTitle(e.target.value)} placeholder="Form Title" className=' text-wrap focus-visible:ring-transparent border-none underline-offset-2 underline decoration-primary decoration-4 font-bold text-2xl ' />
                 <div className="flex w-full flex-col items-start rounded-md border px-3 py-3">
                     <div className="flex w-full flex-row px-1 py-1 items-center justify-between">
                         <Popover open={open} onOpenChange={setOpen}>
@@ -650,10 +720,10 @@ export default function FeedbackForm() {
                                 {/* <div>{index+1}.</div> */}
                                 <div className="flex flex-row justify-between items-center pb-1">
                                     <div className=' font-light text-xs px-1'>{index + 1}</div>
-                                    {value.type === "desc" && <div className=' font-light text-xs'>
+                                    {value.type === "descriptive" && <div className=' font-light text-xs'>
                                         Descriptive
                                     </div>}
-                                    {value.type === "mcq" && <div className=' font-light text-xs'>
+                                    {value.type === "multiplechoice" && <div className=' font-light text-xs'>
                                         Multiple Choice
                                     </div>}
                                     {/* <div className=' font-light text-xs'>Descriptive</div> */}
@@ -663,7 +733,7 @@ export default function FeedbackForm() {
                                 <Textarea className="min-h-[100px] min-w-max" placeholder="Question" onChange={(e) => { handleDescChange(e, index) }} />
 
 
-                                {value.type === "mcq" && <div className="flex flex-col gap-2 pt-2">
+                                {value.type === "multiplechoice" && <div className="flex flex-col gap-2 pt-2">
                                     {value.options.map((opt, idx) => (
                                         <div key={idx} className=" flex flex-row gap-0">
                                             <div className='rounded-l-md bg-green-600 text-white pr-1 flex flex-col justify-between items-center'>
@@ -692,10 +762,10 @@ export default function FeedbackForm() {
                             {/* </Button> */}
                         </PopoverTrigger>
                         <PopoverContent className="w-80 flex flex-wrap">
-                            <PopoverClose onClick={() => { handleIncreaseQuestions("desc") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                            <PopoverClose onClick={() => { handleIncreaseQuestions("descriptive") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
                                 Descriptive
                             </PopoverClose>
-                            <PopoverClose onClick={() => { handleIncreaseQuestions("mcq") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                            <PopoverClose onClick={() => { handleIncreaseQuestions("multiplechoice") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
                                 Multiple Choice
                             </PopoverClose>
                         </PopoverContent>

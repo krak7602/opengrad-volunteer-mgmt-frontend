@@ -1,5 +1,6 @@
 "use client"
-import React, { useState } from 'react';
+import React, { FormEvent, useState } from 'react';
+import { useListState } from '@mantine/hooks';
 import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,23 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+    ToggleGroup,
+    ToggleGroupItem,
+} from "@/components/ui/toggle-group"
+import { Separator } from "@/components/ui/separator"
+
+import { Check, ChevronsUpDown, Divide } from "lucide-react"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+
 
 import { AddOrgForm } from "@/components/volunteer/AddOrgForm"
 import { AddOrgPopup } from "@/components/volunteer/AddOrgPopup"
@@ -35,60 +53,419 @@ import LogField from '@/components/volunteer/LogField';
 import { useToast } from "@/components/ui/use-toast"
 import { columns } from "@/components/volunteer/logColumn" // Not needed
 import { LogTable } from "@/components/volunteer/logTable" // Not needed
+import Question from '@/components/admin/Question';
 
 export default function FeedbackForm() {
     interface FeedbackItem {
-        id: number,
         type: string,
         question: string,
         option_count: number,
-        option1: string,
-        option2: string,
-        option3: string,
-        option4: string, 
+        options: string[]
     }
-    const [numFields, setNumFields] = useState(0);
-    
-    const [formData, setFormData] = useState<FeedbackItem[]>();
-    const formSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // console.log(demoSlot)
-        console.log(formData?.map((slot, index) => (slot)))
 
-        toast({
-            description: "Your form has been submitted successfully"
+    interface Feedback {
+        title: string,
+        recipientType: string,
+        recipientCount: number,
+        recipientList: partner[] | cohort[],
+        feedbackItemCount: number,
+        feedbackItems: FeedbackItem[],
+    }
+
+    const router = useRouter()
+    const [questionCount, setQuestionCount] = useState(0);
+    const [cohortAdd, setCohortAdd] = useState(false);
+    const [partnerAdd, setPartnerAdd] = useState(true);
+    const [feedbackTitle, setFeedbackTitle] = useState("")
+    const [open, setOpen] = React.useState(false)
+    const [value, setValue] = React.useState("")
+    const [recipientCohortCount, setRecipientCohortCount] = useState(0)
+    const [recipientPartnerCount, setRecipientPartnerCount] = useState(0)
+    const [recipientCohorts, setRecipientCohorts] = useListState<cohort>([])
+    const [recipientPartners, setRecipientPartners] = useListState<partner>([])
+    const [questions, setQuestions] = useListState<FeedbackItem>([])
+
+    let qst: FeedbackItem = {
+        type: "mcq",
+        question: "",
+        option_count: 0,
+        options: []
+    }
+
+    interface cohort {
+        id: number,
+        name: string,
+    }
+
+    interface partner {
+        id: number,
+        name: string,
+    }
+
+
+
+    const toggleClick = (option: string) => {
+        if (option === 'cohorts') {
+            setCohortAdd(!cohortAdd);
+            setPartnerAdd(false);
+            // const handleCohorts: cohort[] = []
+            // setRecipientCohorts(handleCohorts)
+            // setRecipientCohortCount(0)
+            // const handlePartners: partner[] = []
+            // setRecipientPartners(handlePartners)
+            // setRecipientPartnerCount(0)
+            setRecipientCohorts.setState([])
+            setRecipientCohortCount(0)
+            setRecipientPartners.setState([])
+            setRecipientPartnerCount(0)
+        } else if (option === 'partners') {
+            setCohortAdd(false);
+            setPartnerAdd(!partnerAdd);
+            // const handleCohorts: cohort[] = []
+            // setRecipientCohorts(handleCohorts)
+            // setRecipientCohortCount(0)
+            // const handlePartners: partner[] = []
+            // setRecipientPartners(handlePartners)
+            // setRecipientPartnerCount(0)
+            setRecipientCohorts.setState([])
+            setRecipientCohortCount(0)
+            setRecipientPartners.setState([])
+            setRecipientPartnerCount(0)
+        }
+    }
+
+    // const AddPartner = (selectedPartner: string) => {
+    //     let found = false
+    //     recipientPartners?.forEach(element => {
+    //         if (element.name === selectedPartner) found = true;
+    //     })
+    //     if (!found) {
+    //         partnerList.forEach(element => {
+    //             if (element.name === selectedPartner) {
+    //                 if (recipientPartnerCount === 0) {
+    //                     const handlePartners: partner[] = [element]
+    //                     setRecipientPartners(handlePartners)
+    //                     setRecipientPartnerCount(recipientPartnerCount + 1)
+    //                 } else {
+    //                     const handlePartners = recipientPartners
+    //                     handlePartners?.push(element)
+    //                     setRecipientPartners(handlePartners)
+    //                     setRecipientPartnerCount(recipientPartnerCount + 1)
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
+    const AddPartner = (selectedPartner: string) => {
+        let found = false
+        recipientPartners?.forEach(element => {
+            if (element.name === selectedPartner) found = true;
+        })
+        if (!found) {
+            partnerList.forEach(element => {
+                if (element.name === selectedPartner) {
+                    // if (recipientPartnerCount === 0) {
+                    //     const handlePartners: partner[] = [element]
+                    //     setRecipientPartners(handlePartners)
+                    //     setRecipientPartnerCount(recipientPartnerCount + 1)
+                    // } else {
+                    //     const handlePartners = recipientPartners
+                    //     handlePartners?.push(element)
+                    //     setRecipientPartners(handlePartners)
+                    //     setRecipientPartnerCount(recipientPartnerCount + 1)
+                    // }
+                    setRecipientPartners.append(element)
+                    setRecipientPartnerCount(recipientPartnerCount + 1)
+                }
+            });
+        }
+    }
+
+    // const AddCohort = (selectedCohort: string) => {
+    //     let found = false
+    //     recipientCohorts?.forEach(element => {
+    //         if (element.name === selectedCohort) found = true;
+    //     })
+    //     if (!found) {
+    //         cohortList.forEach(element => {
+    //             if (element.name === selectedCohort) {
+    //                 if (recipientCohortCount === 0) {
+    //                     const handleCohorts: cohort[] = [element]
+    //                     setRecipientCohorts(handleCohorts)
+    //                     setRecipientCohortCount(recipientCohortCount + 1)
+    //                 } else {
+    //                     const handleCohorts = recipientCohorts
+    //                     handleCohorts?.push(element)
+    //                     setRecipientCohorts(handleCohorts)
+    //                     setRecipientCohortCount(recipientCohortCount + 1)
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
+    const AddCohort = (selectedCohort: string) => {
+        let found = false
+        recipientCohorts?.forEach(element => {
+            if (element.name === selectedCohort) found = true;
+        })
+        if (!found) {
+            cohortList.forEach(element => {
+                if (element.name === selectedCohort) {
+                    // if (recipientCohortCount === 0) {
+                    //     const handleCohorts: cohort[] = [element]
+                    //     setRecipientCohorts(handleCohorts)
+                    //     setRecipientCohortCount(recipientCohortCount + 1)
+                    // } else {
+                    //     const handleCohorts = recipientCohorts
+                    //     handleCohorts?.push(element)
+                    //     setRecipientCohorts(handleCohorts)
+                    //     setRecipientCohortCount(recipientCohortCount + 1)
+                    // }
+                    setRecipientCohorts.append(element)
+                    setRecipientCohortCount(recipientCohortCount + 1)
+                }
+            });
+        }
+    }
+
+    const RemovePartner = (id: number) => {
+        // const handlePartners = recipientPartners
+        // handlePartners?.splice(id, 1)
+        // setRecipientPartners(handlePartners)
+        // setRecipientPartnerCount(recipientPartnerCount - 1)
+        setRecipientPartners.remove(id)
+        setRecipientPartnerCount(recipientPartnerCount - 1)
+    }
+
+    const RemoveCohort = (id: number) => {
+        // const handleCohorts = recipientCohorts
+        // handleCohorts?.splice(id, 1)
+        // setRecipientCohorts(handleCohorts)
+        // setRecipientCohortCount(recipientCohortCount - 1)
+        setRecipientCohorts.remove(id)
+        setRecipientCohortCount(recipientCohortCount - 1)
+    }
+
+    const handleIncreaseQuestions = (type: string) => {
+        // const handleQuestions = questions
+        // handleQuestions.push(
+        //     {
+        //         type: type,
+        //         question: "",
+        //         option_count: 0,
+        //         options: []
+        //     })
+        // setQuestions(handleQuestions)
+        // setQuestionCount(questionCount + 1)
+        setQuestions.append({
+            type: type,
+            question: "",
+            option_count: 0,
+            options: []
+        })
+        setQuestionCount(questionCount + 1)
+    }
+
+    const RemoveQuestion = (id: number) => {
+        // const handleQuestions = questions
+        // handleQuestions.splice(id, 1)
+        // setQuestions(handleQuestions)
+        // setQuestionCount(questionCount - 1)
+        setQuestions.remove(id)
+        setQuestionCount(questionCount - 1)
+    }
+
+    const addOption = (questionId: number) => {
+        // const handleQuestions = questions
+        // if (handleQuestions[questionId].option_count < 4) {
+        //     handleQuestions[questionId].option_count += 1;
+        //     setQuestions(handleQuestions)
+        // }
+
+        if (questions[questionId].option_count < 4) {
+            const opt: string[] = questions[questionId].options
+            opt.push("")
+            setQuestions.setItem(questionId, {
+                type: questions[questionId].type,
+                question: questions[questionId].question,
+                option_count: questions[questionId].option_count + 1,
+                options: opt
+            })
+        }
+    }
+
+    const removeOption = (questionId: number, optId: number) => {
+        const opt: string[] = questions[questionId].options
+        opt.splice(optId, 1)
+        setQuestions.setItem(questionId, {
+            type: questions[questionId].type,
+            question: questions[questionId].question,
+            option_count: questions[questionId].option_count - 1,
+            options: opt
         })
 
-        const dayBuf: logDay = {
-            date: date,
-            slots: formData
+    }
+
+    // const handleAddOption = (index: number) => {
+    //     const handleQuestions = questions
+    //     qst.option_count += 1
+    //     qst.options.push("")
+    //     // if (handleQuestions[index].option_count < 4) {
+    //     //     handleQuestions[index].options.push("")
+    //     //     setQuestions(handleQuestions)
+    //     // }
+    // }
+
+    const handleDescChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
+        // const handleQuestions = questions
+        // // handleQuestions[index].question = e.target.value
+        // qst.question = e.target.value
+        // setQuestions(handleQuestions)
+        setQuestions.setItem(index, {
+            type: questions[index].type,
+            question: e.target.value,
+            option_count: questions[index].option_count,
+            options: questions[index].options
+        })
+    }
+
+    const handleOptionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>, qnIndex: number, optIndex: number) => {
+        //     const handleQuestions = questions
+        //     // handleQuestions[qnIndex].options[optIndex] = e.target.value
+        //     qst.options[optIndex] = e.target.value
+        //     setQuestions(handleQuestions)
+        const opt: string[] = questions[qnIndex].options
+        opt[optIndex] = e.target.value
+        setQuestions.setItem(qnIndex, {
+            type: questions[qnIndex].type,
+            question: questions[qnIndex].question,
+            option_count: questions[qnIndex].option_count,
+            options: opt
+        })
+    }
+
+    // const [formData, setFormData] = useState<FeedbackItem[]>();
+    const formSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (recipientPartnerCount != 0) {
+            const feedback: Feedback = {
+                title: feedbackTitle,
+                recipientType: "partner",
+                recipientCount: recipientPartnerCount,
+                recipientList: recipientPartners,
+                feedbackItemCount: questionCount,
+                feedbackItems: questions,
+            }
+            console.log(feedback)
+        } else if (recipientCohortCount != 0) {
+            const feedback: Feedback = {
+                title: feedbackTitle,
+                recipientType: "cohort",
+                recipientCount: recipientCohortCount,
+                recipientList: recipientCohorts,
+                feedbackItemCount: questionCount,
+                feedbackItems: questions,
+            }
+            console.log(feedback)
         }
+        router.push('/dashboard')
 
-        const dayBufArr: logDay[] = [];
-        dayBufArr.push(dayBuf)
-        dayBufArr.push(dayBuf)
+        // // console.log(demoSlot)
+        // console.log(formData?.map((slot, index) => (slot)))
 
+        // toast({
+        //     description: "Your form has been submitted successfully"
+        // })
 
-
-        // const dayLog: logDay = {
+        // const dayBuf: logDay = {
         //     date: date,
         //     slots: formData
         // }
 
-        // const logHis = logData;
-        // logHis?.logs.push(dayLog);
-        console.log("Daybuf:", dayBuf)
-        console.log("JSON:", JSON.stringify(dayBuf))
-        console.log("Fuul:", JSON.stringify(dayBufArr))
-        //     fs.writeFile('logHis.json', JSON.stringify(dayBuf), (err) => {
-        //         if (err) {
-        //             console.log('Error writing file:', err);
-        //         } else {
-        //             console.log('Successfully wrote file');
-        //         }
-        //     });
-        router.push('/dashboard')
+        // const dayBufArr: logDay[] = [];
+        // dayBufArr.push(dayBuf)
+        // dayBufArr.push(dayBuf)
+
+
+
+        // // const dayLog: logDay = {
+        // //     date: date,
+        // //     slots: formData
+        // // }
+
+        // // const logHis = logData;
+        // // logHis?.logs.push(dayLog);
+        // console.log("Daybuf:", dayBuf)
+        // console.log("JSON:", JSON.stringify(dayBuf))
+        // console.log("Fuul:", JSON.stringify(dayBufArr))
+        // //     fs.writeFile('logHis.json', JSON.stringify(dayBuf), (err) => {
+        // //         if (err) {
+        // //             console.log('Error writing file:', err);
+        // //         } else {
+        // //             console.log('Successfully wrote file');
+        // //         }
+        // //     });
+        // router.push('/dashboard')
     }
+
+
+    const frameworks = [
+        {
+            value: "next.js",
+            label: "Next.js",
+        },
+        {
+            value: "sveltekit",
+            label: "SvelteKit",
+        },
+        {
+            value: "nuxt.js",
+            label: "Nuxt.js",
+        },
+        {
+            value: "remix",
+            label: "Remix",
+        },
+        {
+            value: "astro",
+            label: "Astro",
+        },
+    ]
+
+    const partnerList: partner[] = [
+        {
+            id: 112,
+            name: "NIT Trichy",
+        },
+        {
+            id: 113,
+            name: "NIT Suratkal",
+        },
+        {
+            id: 114,
+            name: "NIT Calicut",
+        },
+        {
+            id: 115,
+            name: "IIT Kharagpur",
+        },
+    ]
+
+    const cohortList: cohort[] = [
+        {
+            id: 112,
+            name: "JEE Advanced 2020",
+        },
+        {
+            id: 113,
+            name: "NEET 2024",
+        },
+        {
+            id: 114,
+            name: "GMAT 2023",
+        },
+    ]
 
     // <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
     //                 <div className='grid grid-cols-1 gap-4'>
@@ -120,51 +497,219 @@ export default function FeedbackForm() {
     return (
 
         <div className="overflow-x-auto px-1 pt-2">
-            <form onSubmit={formSubmit}>
-                
-                <div>
-                    {formData?.map((item, index) => (
-                        // <div>Something</div>
-                            <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={index} />
-                        // <Collapsible key={index} defaultOpen className="gap-6">
-                        //     <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
-                        //         Slot #{index + 1}: {slot.activity}
-                        //         <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
-                        //     </CollapsibleTrigger>
-                        //     <CollapsibleContent>
-                        //         <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={index} />
-                        //     </CollapsibleContent>
-                        // </Collapsible>
-                    ))}
-                    <div className="flex">
-                        {numFields > 0 && <Button type="button" className="mr-3 flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={(e) => { handleDecreaseSlots(e) }} variant="outline">
-                            <RemoveIcon className="h-4 w-4 text-white" />
-                            Delete Field
-                        </Button>}
-                        <Popover>
-                            <PopoverTrigger>
-                                <Button type="button" className="flex items-center justify-center gap-2" variant="outline">
-                                    <PlusIcon className="h-4 w-4 text-black" />
-                                    Add Field
+            <form onSubmit={formSubmit} className="flex flex-col gap-2">
+                <Textarea onChange={(e) => setFeedbackTitle(e.target.value)} placeholder="Form Title" className=' text-wrap focus-visible:ring-transparent border-none underline-offset-2 underline decoration-primary decoration-4 font-bold text-2xl ' />
+                <div className="flex w-full flex-col items-start rounded-md border px-3 py-3">
+                    <div className="flex w-full flex-row px-1 py-1 items-center justify-between">
+                        <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild disabled={partnerAdd}>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={open}
+                                    disabled={partnerAdd}
+                                    className="lg:w-fit w-full font-light py-3 rounded-lg px-3  mb-2 flex justify-center items-center mr-2">
+                                    <PlusIcon className="h-4 w-4" />
+                                    <div className="hidden md:block mx-2">
+                                        Add Recipient
+                                    </div>
                                 </Button>
+                                {/* <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={open}
+                                    className="w-[200px] justify-between mb-2"s
+                                >
+                                    Add Recipient...
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button> */}
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 flex flex-wrap">
-                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Text") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                    Text
-                                </PopoverClose>
-                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Options") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                    Options
-                                </PopoverClose>
-                                
-                            </PopoverContent>
+                            {partnerAdd && <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                    <CommandInput placeholder="Add Recipient" />
+                                    <CommandList>
+                                        <CommandEmpty>No recipient found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {partnerList.map((partner) => (
+                                                <CommandItem
+                                                    key={partner.id}
+                                                    value={partner.name}
+                                                    onSelect={(currentValue) => {
+                                                        AddPartner(currentValue)
+                                                        setValue(currentValue === value ? "" : currentValue)
+                                                        setOpen(false)
+                                                    }}
+                                                >
+                                                    {/* <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            value === partner.name ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    /> */}
+                                                    {partner.name}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>}
+                            {cohortAdd && <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                    <CommandInput placeholder="Add Recipient" />
+                                    <CommandList>
+                                        <CommandEmpty>No recipient found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {cohortList.map((cohort) => (
+                                                <CommandItem
+                                                    key={cohort.id}
+                                                    value={cohort.name}
+                                                    onSelect={(currentValue) => {
+                                                        AddCohort(currentValue)
+                                                        setValue(currentValue === value ? "" : currentValue)
+                                                        setOpen(false)
+                                                    }}
+                                                >
+                                                    {/* <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            value === cohort.name ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    /> */}
+                                                    {cohort.name}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>}
+
+                            {/* <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                    <CommandInput placeholder="Add Recipient" />
+                                    <CommandList>
+                                        <CommandEmpty>No recipient found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {frameworks.map((framework) => (
+                                                <CommandItem
+                                                    key={framework.value}
+                                                    value={framework.value}
+                                                    onSelect={(currentValue) => {
+                                                        setValue(currentValue === value ? "" : currentValue)
+                                                        setOpen(false)
+                                                    }}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            value === framework.value ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {framework.label}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent> */}
+
                         </Popover>
+                        {/* <Button className="lg:w-fit w-full bg-slate-700  hover:bg-slate-800 font-light text-white py-3 rounded-lg px-3  mb-2 flex justify-center items-center mr-2">
+                            <PlusIcon className="h-4 w-4 text-white" />
+                            <div className="hidden md:block  text-white mx-2">Add Recipient</div>
+                        </Button> */}
+                        <ToggleGroup type="single" defaultValue='partners' className=" ml-1 gap-0 mb-2 rounded bg-slate-200">
+                            <ToggleGroupItem className=" px-2 font-light rounded-l-sm rounded-r-none data-[state=on]:bg-primary data-[state=on]:text-white" onClick={() => toggleClick("partners")} value="partners">
+                                <div className=' text-xs'>Partner</div>
+                            </ToggleGroupItem>
+                            {/* <div className=' font-extralight text-gray-600 text-2xl'>/</div> */}
+                            <ToggleGroupItem className=" px-2  font-light rounded-l-none rounded-r-sm data-[state=on]:bg-primary data-[state=on]:text-white" onClick={() => toggleClick("cohorts")} value="cohorts">
+                                <div className=' text-xs'>Cohorts</div>
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                    </div>
+                    <Separator />
+                    <div className=' px-1 pt-2'>
+                        <div className="flex flex-wrap gap-2">
+                            {recipientCohorts?.map((value, index) => (
+                                <div key={index} className="bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
+                                    <div>{value.name}</div>
+                                    <CancelIcon onClick={() => RemoveCohort(index)} className=" w-3 h-3 ml-1 text-white" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {recipientPartners?.map((value, index) => (
+                                <div key={index} className=" bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
+                                    <div>{value.name}</div>
+                                    <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* <h1>numSlots: {numSlots}</h1> */}
-                    {/* <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={0} /> */}
                 </div>
-                <div>
-                    <Button type='submit' className="my-2">Submit</Button>
+
+                {questions?.map((value, index) => (
+                    <div key={index}>
+                        <div className="rounded-sm bg-gray-100 border p-2">
+                            <div className=" flex flex-col">
+                                {/* <div>{index+1}.</div> */}
+                                <div className="flex flex-row justify-between items-center pb-1">
+                                    <div className=' font-light text-xs px-1'>{index + 1}</div>
+                                    {value.type === "desc" && <div className=' font-light text-xs'>
+                                        Descriptive
+                                    </div>}
+                                    {value.type === "mcq" && <div className=' font-light text-xs'>
+                                        Multiple Choice
+                                    </div>}
+                                    {/* <div className=' font-light text-xs'>Descriptive</div> */}
+                                    <CancelIconLight className='font-light text-xs h-3' onClick={() => RemoveQuestion(index)} />
+                                </div>
+
+                                <Textarea className="min-h-[100px] min-w-max" placeholder="Question" onChange={(e) => { handleDescChange(e, index) }} />
+
+
+                                {value.type === "mcq" && <div className="flex flex-col gap-2 pt-2">
+                                    {value.options.map((opt, idx) => (
+                                        <div key={idx} className=" flex flex-row gap-0">
+                                            <div className='rounded-l-md bg-green-600 text-white pr-1 flex flex-col justify-between items-center'>
+                                                <div className="p-1 ">{(String.fromCharCode('A'.charCodeAt(0) + idx))}</div>
+                                                <CancelIcon className="font-light text-green-200 text-xs h-9 py-3" onClick={() => removeOption(index, idx)} />
+                                            </div>
+                                            <Textarea className="min-h-1 min-w-max rounded-l-none rounded-r-md border-green-600 border-2 m-0 focus-visible:ring-transparent" placeholder="Option description" onChange={(e) => { handleOptionsChange(e, index, idx) }} />
+                                        </div>
+                                    ))}
+                                    <Button onClick={() => addOption(index)} type="button" className=" mt-2 flex items-center justify-center gap-2" variant="outline">
+                                        <PlusIcon className="h-4 w-4 text-black" />
+                                        Add Option
+                                    </Button>
+                                </div>}
+
+                            </div>
+                        </div>
+                    </div>))}
+
+                <div className="flex flex-col md:flex-row gap-2">
+                    <Popover>
+                        <PopoverTrigger type='button' className="px-4 py-1 flex items-center justify-center gap-2 border rounded-sm w-full lg:w-fit">
+                            {/* <Button className=" mt-2 flex items-center justify-center gap-2 border rounded-sm"> */}
+                            <PlusIcon className="h-4 w-4 text-black" />
+                            Add Question
+                            {/* </Button> */}
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 flex flex-wrap">
+                            <PopoverClose onClick={() => { handleIncreaseQuestions("desc") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                Descriptive
+                            </PopoverClose>
+                            <PopoverClose onClick={() => { handleIncreaseQuestions("mcq") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                Multiple Choice
+                            </PopoverClose>
+                        </PopoverContent>
+                    </Popover>
+                    {/*DIv location */}
+                    <div>
+                        <Button type='submit' className=" w-full lg:w-fit">Submit</Button>
+                    </div>
                 </div>
             </form>
 
@@ -181,392 +726,7 @@ export default function FeedbackForm() {
     )
 }
 
-export function DailyLog() {
-    const router = useRouter()
-    const [numSlots, setNumSlots] = useState(0);
-    const [formData, setFormData] = useState<slotItem[]>();
-    // const [logData, setLogData] = useState<logHist>()
-    const [date, setDate] = useState<Date>();
-    const { toast } = useToast()
-    const handleSlotFieldChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number, field: string) => {
-        const handleData = formData
-        if (handleData) {
-            if (field == "details") {
-                handleData[index].details = e.target.value;
-            }
-        }
 
-    }
-
-    function getData(): logDay[] {
-        // Fetch data from your API here.
-        return [{ "date": new Date("2024-06-28T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "07", "minStart": "00", "hourEnd": "08", "minEnd": "00", "activity": "Content Creation", "details": "Created P" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Q" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },];
-    }
-
-    const dataLogx = getData()
-
-    const handleTimeChange = (value: string, index: number, field: string, pos: string) => {
-        const handleData = formData
-        if (pos == "start") {
-            if (handleData) {
-                if (field == "hour") {
-                    handleData[index].hourStart = value;
-                } else if (field == "min") {
-                    handleData[index].minStart = value;
-                }
-            }
-        } else if (pos == "end") {
-            if (handleData) {
-                if (field == "hour") {
-                    handleData[index].hourEnd = value;
-                } else if (field == "min") {
-                    handleData[index].minEnd = value;
-                }
-            }
-        }
-
-    }
-    const handleIncreaseSlots = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: string) => {
-        if (numSlots === 0) {
-            const handleData: slotItem[] = [
-                {
-                    id: numSlots,
-                    hourStart: "--",
-                    minStart: "--",
-                    hourEnd: "--",
-                    minEnd: "--",
-                    activity: activity,
-                    details: ""
-                }]
-            setFormData(handleData)
-            setNumSlots(numSlots + 1)
-        } else {
-            const handleData = formData
-            handleData?.push({
-                id: numSlots,
-                hourStart: "--",
-                minStart: "--",
-                hourEnd: "--",
-                minEnd: "--",
-                activity: activity,
-                details: ""
-            })
-            setFormData(handleData)
-            setNumSlots(numSlots + 1)
-        }
-    };
-    const handleDecreaseSlots = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if (numSlots > 0) {
-            const handleData = formData
-            handleData?.pop()
-            setFormData(handleData)
-            setNumSlots(numSlots - 1)
-        }
-    }
-
-
-
-    const formSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // console.log(demoSlot)
-        console.log(formData?.map((slot, index) => (slot)))
-
-        toast({
-            description: "Your form has been submitted successfully"
-        })
-
-        const dayBuf: logDay = {
-            date: date,
-            slots: formData
-        }
-
-        const dayBufArr: logDay[] = [];
-        dayBufArr.push(dayBuf)
-        dayBufArr.push(dayBuf)
-
-
-
-        // const dayLog: logDay = {
-        //     date: date,
-        //     slots: formData
-        // }
-
-        // const logHis = logData;
-        // logHis?.logs.push(dayLog);
-        console.log("Daybuf:", dayBuf)
-        console.log("JSON:", JSON.stringify(dayBuf))
-        console.log("Fuul:", JSON.stringify(dayBufArr))
-        //     fs.writeFile('logHis.json', JSON.stringify(dayBuf), (err) => {
-        //         if (err) {
-        //             console.log('Error writing file:', err);
-        //         } else {
-        //             console.log('Successfully wrote file');
-        //         }
-        //     });
-        router.push('/dashboard')
-    }
-
-    interface slotItem {
-        id: number,
-        hourStart: string,
-        minStart: string,
-        hourEnd: string,
-        minEnd: string,
-        activity: string,
-        details: string,
-    }
-
-    interface logDay {
-        date?: Date,
-        slots?: slotItem[],
-    }
-
-
-
-
-    // const [date1, setDate1] = useState<Date>();
-    // const [date2, setDate2] = useState<Date>();
-    // const [date3, setDate3] = useState<Date>();
-
-    return (
-        <div className="container mx-auto my-6 px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row items-start justify-between mb-2 pb-4">
-                <h1 className="text-2xl pb-1 font-bold">Daily Log </h1>
-                {/* <div className="text-xs text-gray-500">Log your daily activities and time spent.</div> */}
-            </div>
-            <Tabs defaultValue="new-log" className="w-full">
-                <TabsList>
-                    <TabsTrigger value="new-log">New Log</TabsTrigger>
-                    <TabsTrigger value="history">History</TabsTrigger>
-                </TabsList>
-                <TabsContent value="new-log">
-                    {/* <div className="flex flex-col items-center justify-center h-[80vh] gap-6">
-                    </div> */}
-                    <div className="overflow-x-auto px-1 pt-2">
-                        <form onSubmit={formSubmit}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
-                                <div className='grid grid-cols-1 gap-4'>
-                                    <Label htmlFor="date">Date</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                type="button"
-                                                variant={"outline"}
-                                                className={cn(
-                                                    " w-full md:w-[280px] justify-start text-left font-normal",
-                                                    !date && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
-                                                <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-                                                {date ? format(date, "PPP") : <span>Select a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent align="start" className="w-auto p-0">
-                                            <PopoverClose>
-                                                <Calendar initialFocus mode="single" selected={date} onSelect={setDate} />
-                                            </PopoverClose>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                            </div>
-                            {date &&
-                                <div>
-                                    {formData?.map((slot, index) => (
-                                        // <div>Something</div>
-                                        <Collapsible key={index} defaultOpen className="gap-6">
-                                            <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
-                                                Slot #{index + 1}: {slot.activity}
-                                                <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
-                                            </CollapsibleTrigger>
-                                            <CollapsibleContent>
-                                                <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={index} />
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    ))}
-                                    <div className="flex">
-                                        {numSlots > 0 && <Button type="button" className="mr-3 flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={(e) => { handleDecreaseSlots(e) }} variant="outline">
-                                            <RemoveIcon className="h-4 w-4 text-white" />
-                                            Delete Slot
-                                        </Button>}
-                                        <Popover>
-                                            <PopoverTrigger>
-                                                <Button type="button" className="flex items-center justify-center gap-2" variant="outline">
-                                                    <PlusIcon className="h-4 w-4 text-black" />
-                                                    Add Slot
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-80 flex flex-wrap">
-                                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Content Creation") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                                    Content Creation
-                                                </PopoverClose>
-                                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Tech") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                                    Tech
-                                                </PopoverClose>
-                                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Mentoring") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                                    Mentoring
-                                                </PopoverClose>
-                                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Design/Marketing") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                                    Design/Marketing
-                                                </PopoverClose>
-                                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Offline Outreach") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                                    Offline Outreach
-                                                </PopoverClose>
-                                                <PopoverClose onClick={(e) => { handleIncreaseSlots(e, "Other") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                                                    Other
-                                                </PopoverClose>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-
-                                    {/* <h1>numSlots: {numSlots}</h1> */}
-                                    {/* <LogField handleSlotFieldChange={handleSlotFieldChange} handleTimeChange={handleTimeChange} index={0} /> */}
-                                </div>
-                            }
-                            <div>
-                                <Button type='submit' className="my-2">Submit</Button>
-                            </div>
-                        </form>
-
-
-
-
-                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="total-time">Total Time Spent</Label>
-                            <Input id="total-time" readOnly type="text" />
-                        </div>
-                    </div> */}
-                    </div>
-                </TabsContent>
-                <TabsContent value="history">
-                    <div className="container px-0 py-1">
-                        <LogTable columns={columns} data={dataLogx} />
-                    </div>
-                </TabsContent>
-            </Tabs>
-
-        </div>
-        // <div className="container mx-auto my-6 px-4 sm:px-6 lg:px-8">
-        //     <div className="flex flex-col sm:flex-row items-start justify-between mb-2">
-        //         <h1 className="text-2xl pb-6 font-bold">Assigned Mentees</h1>
-        //     </div>
-        // <div>
-        //     <Card className="w-full max-w-2xl border-transparent">
-        //         <div className="container mx-auto my-6 px-4 sm:px-6 lg:px-8">
-        //             <CardHeader className="p-0 pb-4">
-        //                 <CardTitle className="text-2xl pb-1 font-bold">Daily Work Log</CardTitle>
-        //                 <CardDescription>Log your daily activities and time spent.</CardDescription>
-        //             </CardHeader>
-        //             <CardContent className="p-0">
-        //                 {/* <form className="grid gap-4"> */}
-        //                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
-        //                     <div>
-        //                         <Label htmlFor="date">Date</Label>
-        //                         <Popover>
-        //                             <PopoverTrigger asChild>
-        //                                 <Button
-        //                                     variant={"outline"}
-        //                                     className={cn(
-        //                                         " w-full md:w-[280px] justify-start text-left font-normal",
-        //                                         !date1 && "text-muted-foreground"
-        //                                     )}
-        //                                 >
-        //                                     {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
-        //                                     <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-        //                                     {date1 ? format(date1, "PPP") : <span>Select a date</span>}
-        //                                 </Button>
-        //                             </PopoverTrigger>
-        //                             <PopoverContent align="start" className="w-auto p-0">
-        //                                 <Calendar initialFocus mode="single" selected={date1} onSelect={setDate1} />
-        //                             </PopoverContent>
-        //                         </Popover>
-        //                     </div>
-        //                 </div>
-        //                 <div className="grid gap-4">
-        //                     {Array.from({ length: numSlots }, (_, index) => (
-        //                         <Collapsible className="gap-6">
-        //                             <CollapsibleTrigger className="flex w-full items-center justify-between text-lg font-semibold [&[data-state=open]>svg]:rotate-90">
-        //                                 Time Period {index + 1}
-        //                                 <ChevronRightIcon className="ml-auto h-5 w-5 transition-all" />
-        //                             </CollapsibleTrigger>
-        //                             <CollapsibleContent>
-        //                                 {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
-        //                                 <div className="flex-wrap flex-col pl-1">
-        //                                     <div className=" flex flex-wrap">
-        //                                         <div className="py-3 md:px-5">
-        //                                             <Label htmlFor="start-time">Start Time</Label>
-        //                                             <TimePicker12Demo date={date2} setDate={setDate2} />
-        //                                             {/* <Input id="start-time" type="time" /> */}
-        //                                         </div>
-        //                                         <div className="py-3 md:px-5">
-        //                                             <Label htmlFor="end-time">End Time</Label>
-        //                                             <TimePicker12Demo date={date3} setDate={setDate3} />
-        //                                             {/* <Input id="end-time" type="time" /> */}
-        //                                         </div>
-        //                                     </div>
-
-        //                                     <div className="col-span-2 py-3">
-        //                                         <Label htmlFor="activity">Activity</Label>
-        //                                         <Textarea className="min-h-[100px] min-w-max" id="activity" placeholder="Describe your activity" />
-        //                                     </div>
-        //                                     {/* <div className="md:col-span-4">
-        //                                     <Label htmlFor="time-spent">Time Spent</Label>
-        //                                     <Input id="time-spent" readOnly type="text" />
-        //                                 </div> */}
-        //                                 </div>
-        //                             </CollapsibleContent>
-        //                         </Collapsible>
-        //                     ))}
-        //                     {numSlots > 1 && <Button className="flex items-center justify-center gap-2 bg-destructive hover:bg-destructive text-white hover:text-white" onClick={() => setNumSlots(numSlots - 1)} variant="outline">
-        //                         {/* <PlusIcon className="h-4 w-4" /> */}
-        //                         Delete Time Period
-        //                     </Button>}
-        //                     <Button className="flex items-center justify-center gap-2" onClick={() => setNumSlots(numSlots + 1)} variant="outline">
-        //                         <PlusIcon className="h-4 w-4" />
-        //                         Add Time Period
-        //                     </Button>
-        //                     <div className="time-periods grid gap-4" />
-        //                 </div>
-        //                 {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        //                 <div>
-        //                     <Label htmlFor="total-time">Total Time Spent</Label>
-        //                     <Input id="total-time" readOnly type="text" />
-        //                 </div>
-        //             </div> */}
-        //                 {/* </form> */}
-        //             </CardContent>
-        //             <CardFooter className="p-0">
-        //                 <Button type="submit">Submit</Button>
-        //             </CardFooter>
-        //         </div>
-        //         {/* <Card className="container mx-auto my-6 px-4 sm:px-6 lg:px-8"> */}
-
-        //     </Card>
-        // </div>
-
-    )
-}
 
 
 function CalendarDaysIcon(props: { className: string }) {
@@ -650,4 +810,21 @@ const RemoveIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+const CancelIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+        <path d="M19.0005 4.99988L5.00045 18.9999M5.00045 4.99988L19.0005 18.9999" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
+const CancelIconLight = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+        <path d="M19.0005 4.99988L5.00045 18.9999M5.00045 4.99988L19.0005 18.9999" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+
+
+const CancelCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+        <path d="M15.7494 15L9.75 9M9.75064 15L15.75 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M22.75 12C22.75 6.47715 18.2728 2 12.75 2C7.22715 2 2.75 6.47715 2.75 12C2.75 17.5228 7.22715 22 12.75 22C18.2728 22 22.75 17.5228 22.75 12Z" stroke="currentColor" strokeWidth="1.5" />
+    </svg>);

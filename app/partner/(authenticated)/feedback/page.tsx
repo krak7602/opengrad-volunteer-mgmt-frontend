@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import FeedbackForm from "@/components/admin/FeedbackForm"
+import FeedbackForm from "@/components/partner/FeedbackForm"
 
 
 export default function Page({
