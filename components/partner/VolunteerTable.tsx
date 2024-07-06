@@ -60,7 +60,7 @@ export function VolunteerTable<TData, TValue>({
                                 {headerGroup.headers.map((header) => {
                                     if (header.column.columnDef.header == "Details") {
                                         return (
-                                            <TableHead>
+                                            <TableHead key={header.id}>
                                                 <div className="flex items-center justify-end space-x-2 py-4">
                                                     <Button
                                                         variant="outline"

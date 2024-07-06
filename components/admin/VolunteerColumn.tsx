@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, CellContext } from "@tanstack/react-table"
 import {
     Drawer,
     DrawerClose,
@@ -17,10 +17,37 @@ export type volunteerColumn = {
     name: string,
 }
 
+interface user_id {
+    id: number,
+    name: string,
+    email: string,
+    role: string
+}
 
-export const columns: ColumnDef<volunteerColumn>[] = [
+interface poc {
+    id: number
+}
+
+interface vol {
+    id: number,
+    poc: poc,
+    user_id: user_id,
+}
+
+
+const CellComponent = (row: CellContext<vol, unknown>) => {
+    const router = useRouter()
+    const projectedData = row.getValue() as string;
+    // const val:slotItem = getValue()
+    return <Button onClick={() => { router.push(`/volunteers/${projectedData}`) }}>
+        Details
+    </Button>
+}
+
+
+export const columns: ColumnDef<vol>[] = [
     {
-        accessorKey: "name",
+        accessorKey: "user_id.name",
         header: "Name",
         meta: {
             align: 'left'
@@ -38,14 +65,15 @@ export const columns: ColumnDef<volunteerColumn>[] = [
         meta: {
             align: 'right'
         },
-        cell: ({ getValue }) => {
-            const router = useRouter()
-            const projectedData = getValue() as string;
-            // const val:slotItem = getValue()
-            return  <Button onClick={()=>{router.push(`/partners/${projectedData}`)}}>
-                Details
-            </Button>
-        }
+        cell: CellComponent
+        // cell: ({ getValue }) => {
+        //     const router = useRouter()
+        //     const projectedData = getValue() as string;
+        //     // const val:slotItem = getValue()
+        //     return <Button onClick={() => { router.push(`/partners/${projectedData}`) }}>
+        //         Details
+        //     </Button>
+        // }
 
     }
 

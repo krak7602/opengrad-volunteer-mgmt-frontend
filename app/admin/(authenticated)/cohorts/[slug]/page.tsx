@@ -5,8 +5,14 @@ import { Button } from "@/components/ui/button"
 // import PartnerListing from "@/components/admin/PartnerListing"
 import { AddStudent } from "@/components/admin/AddStudent"
 import { VolunteerTable } from "@/components/admin/VolunteerTable"
-import { columns, volunteerColumn } from "@/components/admin/VolunteerColumn"
+import { columns } from "@/components/admin/VolunteerColumnCohort"
+import { columns as studentColumns } from "@/components/admin/StudentColumn"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useSession } from 'next-auth/react'
+import { useFetch } from "@/lib/useFetch"
+import { StudentTable } from "@/components/admin/StudentTable"
+import { AddVolunteerCohort } from "@/components/admin/AddVolunteerCohort"
+
 export default function Page({
     params,
     searchParams,
@@ -14,7 +20,44 @@ export default function Page({
     params: { slug: string }
     searchParams: { [key: string]: string | string[] | undefined }
 }) {
-    const dat: volunteerColumn[] = [{ id: "101", name: "Someone" }, { id: "102", name: "Someone else" }]
+    const session = useSession();
+    interface vol {
+        id: number
+    }
+
+    interface vols {
+        id: number,
+        name: string,
+        startDate: number,
+        endDate: number,
+        vol: vol[]
+    }
+
+    interface student {
+        id: number,
+        name: string,
+        email: string,
+        phone: string,
+        volId: number,
+        cohortId: number
+    }
+
+    const { data, loading, error, refetch, abort } = useFetch<vols[]>(
+        `http://localhost:5001/cohort/volByCohort/${Number(params.slug)}`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
+    );
+
+    const dataStudents = useFetch<student[]>(
+        `http://localhost:5001/students/getbyCohort/${Number(params.slug)}`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
+    );
+    // const dat: volunteerColumn[] = [{ id: "101", name: "Someone" }, { id: "102", name: "Someone else" }]
     return (
         <Tabs id="cohort-tab" defaultValue="students">
             <div className="container mx-auto my-6 px-2 lg:px-8">
@@ -26,10 +69,10 @@ export default function Page({
                     <div className="flex gap-1 w-full flex-row justify-end">
 
                         <TabsContent value="students" className=" text-black m-0" >
-                            <AddStudent />
+                            <AddStudent cohId={params.slug}/>
                         </TabsContent>
                         <TabsContent value="volunteers" className=" text-black m-0" >
-                            <AddStudent />
+                            <AddVolunteerCohort cohId={params.slug}/>
                         </TabsContent>
                         <TabsList>
                             <TabsTrigger value="students">
@@ -43,9 +86,15 @@ export default function Page({
                     {/* <h1 className="rounded-sm text-xs bg-primary text-white p-1 font-bold pl-1 md:mr-5"></h1> */}
                 </div>
                 <div className="overflow-x-auto">
-                    <TabsContent value="students">Make changes to your account here.</TabsContent>
+                    <TabsContent value="students">
+                        {dataStudents.data && <div>
+                            <StudentTable columns={studentColumns} data={dataStudents.data} />
+                        </div>}
+                    </TabsContent>
                     <TabsContent value="volunteers">
-                        <VolunteerTable columns={columns} data={dat} />
+                        {data && <div>
+                            <VolunteerTable columns={columns} data={data[0].vol} />
+                        </div>}
                     </TabsContent>
                 </div>
             </div>

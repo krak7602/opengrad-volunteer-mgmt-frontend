@@ -4,7 +4,7 @@ import { columns, partnerColumn } from "@/components/admin/PartnerColumn"
 import { auth } from "@/auth"
 // import { useAppSelector } from "@/lib/store";
 import { useSession, SessionProvider } from 'next-auth/react'
-import {  useListState } from "@mantine/hooks"
+import { useListState } from "@mantine/hooks"
 import { useFetch } from "@/lib/useFetch"
 import { title } from '@/lib/atoms'
 import { useAtom } from "jotai";
@@ -22,9 +22,13 @@ export default function PartnerListing() {
         email: string,
         role: string
     }
-
+    const session = useSession();
     const { data, loading, error, refetch, abort } = useFetch<poc[]>(
-        `http://localhost:5001/user/get/poc`
+        `http://localhost:5001/user/get/poc`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
     );
 
 
@@ -32,7 +36,7 @@ export default function PartnerListing() {
     const dat: partnerColumn[] = [{ id: "101", name: "NIT" }, { id: "102", name: "IIT" }]
     // const authData = useAppSelector((state) => state.auth);
     // console.log(authData)
-    const session = useSession();
+
     useEffect(() => {
         if (data) {
             // setResponseCount(data?.length);

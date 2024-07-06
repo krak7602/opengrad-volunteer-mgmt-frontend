@@ -21,7 +21,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[]
 }
 
-export function LogTable<TData, TValue>({
+export function StudentTable<TData, TValue>({
     columns,
     data,
 }: DataTableProps<TData, TValue>) {

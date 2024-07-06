@@ -58,7 +58,7 @@ export const columns: ColumnDef<logDay>[] = [
                 <DrawerContent>
                     <DrawerFooter>
                         {projectedData.map((slot, index) => (
-                            <div>
+                            <div key={index}>
                                 <div className="flex text-pretty">
                                     <div className=" text-lg font-semibold">Slot #{index + 1}: {slot.activity} ({slot.hourStart}:{slot.minStart} - {slot.hourEnd}:{slot.minEnd})</div>
                                 </div>

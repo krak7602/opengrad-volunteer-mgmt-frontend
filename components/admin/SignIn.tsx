@@ -56,14 +56,14 @@ export default function SignIn({ curRole }: { curRole: string }) {
         const { email, password, role } = validatedFields.data
 
         // const resp = await axios.post(
-        axios.post(
-            `http://localhost:5001/auth/login`,
-            {
-                "email": email,
-                "password": password,
-            },
-            { withCredentials: true }
-        ).then((resp) => console.log("The cookie found:",resp.headers["set-cookie"]))
+        // axios.post(
+        //     `http://localhost:5001/auth/login`,
+        //     {
+        //         "email": email,
+        //         "password": password,
+        //     },
+        //     { withCredentials: true }
+        // ).then((resp) => console.log("The cookie found:",resp.headers["set-cookie"]))
         // dispatch(setAuthState({
         //     authState: true,
         //     userId: "101",

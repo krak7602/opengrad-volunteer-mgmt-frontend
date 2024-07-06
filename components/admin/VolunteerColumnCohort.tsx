@@ -1,4 +1,4 @@
-import { Cell, CellContext, ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, CellContext } from "@tanstack/react-table"
 import {
     Drawer,
     DrawerClose,
@@ -11,31 +11,30 @@ import {
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
-import { Getter } from "jotai"
 
-export interface cohortColumn {
-    id: number,
-    name: string,
-    startDate: string,
-    endDate: string,
+export type volunteerColumn = {
+    id: string,
+    // name: string,
 }
 
-const CellComponent = (row: CellContext<cohortColumn, unknown>) => {
+interface vol {
+    id: number
+}
+
+
+const CellComponent = (row: CellContext<vol, unknown>) => {
     const router = useRouter()
-    const pushPage = (id: string) => {
-        router.push(`/cohorts/${id}`)
-    }
     const projectedData = row.getValue() as string;
     // const val:slotItem = getValue()
-    return <Button onClick={() => { pushPage(projectedData) }}>
+    return <Button onClick={() => { router.push(`/volunteers/${projectedData}`) }}>
         Details
     </Button>
 }
 
 
-export const columns: ColumnDef<cohortColumn>[] = [
+export const columns: ColumnDef<vol>[] = [
     {
-        accessorKey: "name",
+        accessorKey: "id",
         header: "Name",
         meta: {
             align: 'left'
@@ -54,6 +53,14 @@ export const columns: ColumnDef<cohortColumn>[] = [
             align: 'right'
         },
         cell: CellComponent
+        // cell: ({ getValue }) => {
+        //     const router = useRouter()
+        //     const projectedData = getValue() as string;
+        //     // const val:slotItem = getValue()
+        //     return <Button onClick={() => { router.push(`/partners/${projectedData}`) }}>
+        //         Details
+        //     </Button>
+        // }
 
     }
 

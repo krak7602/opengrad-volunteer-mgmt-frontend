@@ -5,13 +5,13 @@ export interface UseFetchOptions extends RequestInit {
 }
 
 export function useFetch<T>(url: string, { autoInvoke = true, ...options }: UseFetchOptions = {}) {
-    "use server"
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const controller = useRef<AbortController | null>(null);
     // const full = cookies().get("connect.sid")
     const full = localStorage.getItem("authCookie")
+    console.log("This is full:",full)
     // const val = full?.name + "=" + full?.value
     
 

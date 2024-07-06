@@ -37,6 +37,9 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command"
+import axios from "axios"
+import { useFetch } from "@mantine/hooks"
+import { useSession } from 'next-auth/react'
 
 
 import { AddOrgForm } from "@/components/volunteer/AddOrgForm"
@@ -56,6 +59,7 @@ import { LogTable } from "@/components/volunteer/logTable" // Not needed
 import Question from '@/components/admin/Question';
 
 export default function FeedbackForm() {
+    const session = useSession();
     interface FeedbackItem {
         type: string,
         question: string,
@@ -71,6 +75,25 @@ export default function FeedbackForm() {
         feedbackItemCount: number,
         feedbackItems: FeedbackItem[],
     }
+    interface poc {
+        id: number,
+    }
+
+    interface cohortColumn {
+        id: number,
+        name: string,
+        startDate: string,
+        endDate: string,
+        poc: poc[]
+    }
+
+    const cohortData = useFetch<cohortColumn[]>(
+        `http://localhost:5001/cohort/poc/${session.data?.user.auth_token}`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
+    );
 
     const router = useRouter()
     const [questionCount, setQuestionCount] = useState(0);
@@ -81,8 +104,8 @@ export default function FeedbackForm() {
     const [value, setValue] = React.useState("")
     const [recipientCohortCount, setRecipientCohortCount] = useState(0)
     const [recipientPartnerCount, setRecipientPartnerCount] = useState(0)
-    const [recipientCohorts, setRecipientCohorts] = useListState<cohort>([])
-    const [recipientPartners, setRecipientPartners] = useListState<partner>([])
+    const [recipientCohorts, setRecipientCohorts] = useListState<cohortColumn>([])
+    // const [recipientPartners, setRecipientPartners] = useListState<partner>([])
     const [questions, setQuestions] = useListState<FeedbackItem>([])
 
     let qst: FeedbackItem = {
@@ -116,7 +139,7 @@ export default function FeedbackForm() {
             // setRecipientPartnerCount(0)
             setRecipientCohorts.setState([])
             setRecipientCohortCount(0)
-            setRecipientPartners.setState([])
+            // setRecipientPartners.setState([])
             setRecipientPartnerCount(0)
         } else if (option === 'partners') {
             setCohortAdd(false);
@@ -129,8 +152,8 @@ export default function FeedbackForm() {
             // setRecipientPartnerCount(0)
             setRecipientCohorts.setState([])
             setRecipientCohortCount(0)
-            setRecipientPartners.setState([])
-            setRecipientPartnerCount(0)
+            // setRecipientPartners.setState([])
+            setRecipientPartnerCount(1)
         }
     }
 
@@ -156,30 +179,30 @@ export default function FeedbackForm() {
     //         });
     //     }
     // }
-    const AddPartner = (selectedPartner: string) => {
-        let found = false
-        recipientPartners?.forEach(element => {
-            if (element.name === selectedPartner) found = true;
-        })
-        if (!found) {
-            partnerList.forEach(element => {
-                if (element.name === selectedPartner) {
-                    // if (recipientPartnerCount === 0) {
-                    //     const handlePartners: partner[] = [element]
-                    //     setRecipientPartners(handlePartners)
-                    //     setRecipientPartnerCount(recipientPartnerCount + 1)
-                    // } else {
-                    //     const handlePartners = recipientPartners
-                    //     handlePartners?.push(element)
-                    //     setRecipientPartners(handlePartners)
-                    //     setRecipientPartnerCount(recipientPartnerCount + 1)
-                    // }
-                    setRecipientPartners.append(element)
-                    setRecipientPartnerCount(recipientPartnerCount + 1)
-                }
-            });
-        }
-    }
+    // const AddPartner = (selectedPartner: string) => {
+    //     let found = false
+    //     recipientPartners?.forEach(element => {
+    //         if (element.name === selectedPartner) found = true;
+    //     })
+    //     if (!found) {
+    //         partnerList.forEach(element => {
+    //             if (element.name === selectedPartner) {
+    //                 // if (recipientPartnerCount === 0) {
+    //                 //     const handlePartners: partner[] = [element]
+    //                 //     setRecipientPartners(handlePartners)
+    //                 //     setRecipientPartnerCount(recipientPartnerCount + 1)
+    //                 // } else {
+    //                 //     const handlePartners = recipientPartners
+    //                 //     handlePartners?.push(element)
+    //                 //     setRecipientPartners(handlePartners)
+    //                 //     setRecipientPartnerCount(recipientPartnerCount + 1)
+    //                 // }
+    //                 setRecipientPartners.append(element)
+    //                 setRecipientPartnerCount(recipientPartnerCount + 1)
+    //             }
+    //         });
+    //     }
+    // }
 
     // const AddCohort = (selectedCohort: string) => {
     //     let found = false
@@ -203,14 +226,14 @@ export default function FeedbackForm() {
     //         });
     //     }
     // }
-    const AddCohort = (selectedCohort: string) => {
+    const AddCohort = (selectedCohort: cohortColumn) => {
         let found = false
         recipientCohorts?.forEach(element => {
-            if (element.name === selectedCohort) found = true;
+            if (element.name === selectedCohort.name) found = true;
         })
-        if (!found) {
-            cohortList.forEach(element => {
-                if (element.name === selectedCohort) {
+        if (!found && cohortData.data) {
+            cohortData.data.forEach(element => {
+                if (element.name === selectedCohort.name) {
                     // if (recipientCohortCount === 0) {
                     //     const handleCohorts: cohort[] = [element]
                     //     setRecipientCohorts(handleCohorts)
@@ -228,14 +251,14 @@ export default function FeedbackForm() {
         }
     }
 
-    const RemovePartner = (id: number) => {
-        // const handlePartners = recipientPartners
-        // handlePartners?.splice(id, 1)
-        // setRecipientPartners(handlePartners)
-        // setRecipientPartnerCount(recipientPartnerCount - 1)
-        setRecipientPartners.remove(id)
-        setRecipientPartnerCount(recipientPartnerCount - 1)
-    }
+    // const RemovePartner = (id: number) => {
+    //     // const handlePartners = recipientPartners
+    //     // handlePartners?.splice(id, 1)
+    //     // setRecipientPartners(handlePartners)
+    //     // setRecipientPartnerCount(recipientPartnerCount - 1)
+    //     setRecipientPartners.remove(id)
+    //     setRecipientPartnerCount(recipientPartnerCount - 1)
+    // }
 
     const RemoveCohort = (id: number) => {
         // const handleCohorts = recipientCohorts
@@ -345,20 +368,101 @@ export default function FeedbackForm() {
     }
 
     // const [formData, setFormData] = useState<FeedbackItem[]>();
-    const formSubmit = (e: React.FormEvent) => {
+    const formSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+
         if (recipientPartnerCount != 0) {
-            const feedback: Feedback = {
-                title: feedbackTitle,
-                recipientType: "partner",
-                recipientCount: recipientPartnerCount,
-                recipientList: recipientPartners,
-                feedbackItemCount: questionCount,
-                feedbackItems: questions,
+            try {
+                if (questionCount != 0) {
+                    const resp = await axios.post(
+                        `http://localhost:5001/forms/create`,
+                        {
+                            "receipientType": "poc",
+                            "receipientId": [session.data?.user.id],
+                            "feedbackItemCount": recipientPartnerCount,
+                            "feedbackItems": questions,
+                        }, {
+                        headers: {
+                            Authorization: `bearer ${session.data?.user.auth_token}`
+                        }
+                    }
+                        // { withCredentials: true }
+                    );
+                    if (resp.data.id) {
+                        const resp2 = await axios.post(
+                            `http://localhost:5001/notification/poc/create`,
+                            {
+                                "typeofnotification": "form",
+                                "Message": feedbackTitle,
+                                "form_id": resp.data.id,
+                                "receipient_id": [session.data?.user.id]
+                            }, {
+                            headers: {
+                                Authorization: `bearer ${session.data?.user.auth_token}`
+                            }
+                        }
+                            // { withCredentials: true }
+                        );
+                    }
+
+
+                    console.log("The error is this:", resp.data)
+                }
+                // console.log("This is the data:",resp.data)
+            } catch (e) {
+                console.log(e)
             }
-            console.log(feedback)
+            // const feedback: Feedback = {
+            //     title: feedbackTitle,
+            //     recipientType: "partner",
+            //     recipientCount: recipientPartnerCount,
+            //     recipientList: recipientPartners,
+            //     feedbackItemCount: questionCount,
+            //     feedbackItems: questions,
+            // }
+            // console.log(feedback)
         } else if (recipientCohortCount != 0) {
+            try {
+                if (questionCount != 0) {
+                    const cohs = recipientCohorts.map(x => x.id)
+                    const resp = await axios.post(
+                        `http://localhost:5001/forms/create`,
+                        {
+                            "receipientType": "cohort",
+                            "receipientId": cohs,
+                            "feedbackItemCount": recipientCohortCount,
+                            "feedbackItems": questions,
+                        }, {
+                        headers: {
+                            Authorization: `bearer ${session.data?.user.auth_token}`
+                        }
+                    }
+                        // { withCredentials: true }
+                    );
+                    if (resp.data.id) {
+                        const resp2 = await axios.post(
+                            `http://localhost:5001/notification/cohort/create`,
+                            {
+                                "typeofnotification": "form",
+                                "Message": feedbackTitle,
+                                "form_id": resp.data.id,
+                                "receipient_id": cohs
+                            }, {
+                            headers: {
+                                Authorization: `bearer ${session.data?.user.auth_token}`
+                            }
+                        }
+                            // { withCredentials: true }
+                        );
+                    }
+
+                    console.log("The error is this:", resp.data)
+                }
+                // console.log("This is the data:",resp.data)
+            } catch (e) {
+                console.log(e)
+            }
             const feedback: Feedback = {
                 title: feedbackTitle,
                 recipientType: "cohort",
@@ -524,7 +628,7 @@ export default function FeedbackForm() {
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button> */}
                             </PopoverTrigger>
-                            {partnerAdd && <PopoverContent className="w-[200px] p-0">
+                            {/* {partnerAdd && <PopoverContent className="w-[200px] p-0">
                                 <Command>
                                     <CommandInput placeholder="Add Recipient" />
                                     <CommandList>
@@ -540,44 +644,40 @@ export default function FeedbackForm() {
                                                         setOpen(false)
                                                     }}
                                                 >
-                                                    {/* <Check
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            value === partner.name ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    /> */}
                                                     {partner.name}
                                                 </CommandItem>
                                             ))}
                                         </CommandGroup>
                                     </CommandList>
                                 </Command>
-                            </PopoverContent>}
+                            </PopoverContent>} */}
                             {cohortAdd && <PopoverContent className="w-[200px] p-0">
                                 <Command>
                                     <CommandInput placeholder="Add Recipient" />
                                     <CommandList>
                                         <CommandEmpty>No recipient found.</CommandEmpty>
                                         <CommandGroup>
-                                            {cohortList.map((cohort) => (
-                                                <CommandItem
-                                                    key={cohort.id}
-                                                    value={cohort.name}
-                                                    onSelect={(currentValue) => {
-                                                        AddCohort(currentValue)
-                                                        setValue(currentValue === value ? "" : currentValue)
-                                                        setOpen(false)
-                                                    }}
-                                                >
-                                                    {/* <Check
+                                            {cohortData.data && cohortData.data.constructor === Array && <div>
+                                                {cohortData.data.map((cohort) => (
+                                                    <CommandItem
+                                                        key={cohort.id}
+                                                        value={cohort.name}
+                                                        onSelect={(currentValue) => {
+                                                            AddCohort(cohort)
+                                                            setValue(currentValue === value ? "" : currentValue)
+                                                            setOpen(false)
+                                                        }}
+                                                    >
+                                                        {/* <Check
                                                         className={cn(
                                                             "mr-2 h-4 w-4",
                                                             value === cohort.name ? "opacity-100" : "opacity-0"
                                                         )}
                                                     /> */}
-                                                    {cohort.name}
-                                                </CommandItem>
-                                            ))}
+                                                        {cohort.name}
+                                                    </CommandItem>
+                                                ))}
+                                            </div>}
                                         </CommandGroup>
                                     </CommandList>
                                 </Command>
@@ -637,14 +737,14 @@ export default function FeedbackForm() {
                                 </div>
                             ))}
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        {/* <div className="flex flex-wrap gap-2">
                             {recipientPartners?.map((value, index) => (
                                 <div key={index} className=" bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
                                     <div>{value.name}</div>
                                     <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
                                 </div>
                             ))}
-                        </div>
+                        </div> */}
                     </div>
 
                 </div>

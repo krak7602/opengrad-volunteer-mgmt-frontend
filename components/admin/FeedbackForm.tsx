@@ -3,7 +3,7 @@ import React, { FormEvent, useState } from 'react';
 import { useListState } from '@mantine/hooks';
 import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils"
 import { DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table"
@@ -55,6 +55,8 @@ import { columns } from "@/components/volunteer/logColumn" // Not needed
 import { LogTable } from "@/components/volunteer/logTable" // Not needed
 import Question from '@/components/admin/Question';
 import axios from "axios"
+import { useFetch } from "@mantine/hooks"
+import { useSession } from 'next-auth/react'
 
 export default function FeedbackForm() {
     interface FeedbackItem {
@@ -72,6 +74,38 @@ export default function FeedbackForm() {
         feedbackItemCount: number,
         feedbackItems: FeedbackItem[],
     }
+    const session = useSession();
+    interface cohortColumn {
+        id: number,
+        name: string,
+        startDate: string,
+        endDate: string,
+    }
+    const cohortData = useFetch<cohortColumn[]>(
+        'http://localhost:5001/cohort/all', {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
+    );
+    interface poc {
+        id: number,
+        user_id: user_id,
+    }
+
+    interface user_id {
+        id: number,
+        name: string,
+        email: string,
+        role: string
+    }
+    const partnerData = useFetch<poc[]>(
+        `http://localhost:5001/user/get/poc`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
+    );
 
     const router = useRouter()
     const [questionCount, setQuestionCount] = useState(0);
@@ -82,9 +116,10 @@ export default function FeedbackForm() {
     const [value, setValue] = React.useState("")
     const [recipientCohortCount, setRecipientCohortCount] = useState(0)
     const [recipientPartnerCount, setRecipientPartnerCount] = useState(0)
-    const [recipientCohorts, setRecipientCohorts] = useListState<cohort>([])
-    const [recipientPartners, setRecipientPartners] = useListState<partner>([])
+    const [recipientCohorts, setRecipientCohorts] = useListState<cohortColumn>([])
+    const [recipientPartners, setRecipientPartners] = useListState<poc>([])
     const [questions, setQuestions] = useListState<FeedbackItem>([])
+
 
     let qst: FeedbackItem = {
         type: "mcq",
@@ -157,14 +192,14 @@ export default function FeedbackForm() {
     //         });
     //     }
     // }
-    const AddPartner = (selectedPartner: string) => {
+    const AddPartner = (selectedPartner: poc) => {
         let found = false
         recipientPartners?.forEach(element => {
-            if (element.name === selectedPartner) found = true;
+            if (element.user_id.name === selectedPartner.user_id.name) found = true;
         })
-        if (!found) {
-            partnerList.forEach(element => {
-                if (element.name === selectedPartner) {
+        if (!found && partnerData.data) {
+            partnerData.data.forEach(element => {
+                if (element.user_id.name === selectedPartner.user_id.name) {
                     // if (recipientPartnerCount === 0) {
                     //     const handlePartners: partner[] = [element]
                     //     setRecipientPartners(handlePartners)
@@ -204,14 +239,14 @@ export default function FeedbackForm() {
     //         });
     //     }
     // }
-    const AddCohort = (selectedCohort: string) => {
+    const AddCohort = (selectedCohort: cohortColumn) => {
         let found = false
         recipientCohorts?.forEach(element => {
-            if (element.name === selectedCohort) found = true;
+            if (element.name === selectedCohort.name) found = true;
         })
-        if (!found) {
-            cohortList.forEach(element => {
-                if (element.name === selectedCohort) {
+        if (!found && cohortData.data) {
+            cohortData.data.forEach(element => {
+                if (element.name === selectedCohort.name) {
                     // if (recipientCohortCount === 0) {
                     //     const handleCohorts: cohort[] = [element]
                     //     setRecipientCohorts(handleCohorts)
@@ -352,14 +387,19 @@ export default function FeedbackForm() {
         if (recipientPartnerCount != 0) {
             try {
                 if (questionCount != 0) {
+                    const parts = recipientPartners.map(x => x.id)
                     const resp = await axios.post(
                         `http://localhost:5001/forms/create`,
                         {
                             "receipientType": "poc",
-                            "receipientId": [1, 2],
+                            "receipientId": parts,
                             "feedbackItemCount": recipientPartnerCount,
                             "feedbackItems": questions,
+                        }, {
+                        headers: {
+                            Authorization: `bearer ${session.data?.user.auth_token}`
                         }
+                    }
                         // { withCredentials: true }
                     );
                     if (resp.data.id) {
@@ -369,8 +409,12 @@ export default function FeedbackForm() {
                                 "typeofnotification": "form",
                                 "Message": feedbackTitle,
                                 "form_id": resp.data.id,
-                                "receipient_id": [1, 2]
+                                "receipient_id": parts
+                            }, {
+                            headers: {
+                                Authorization: `bearer ${session.data?.user.auth_token}`
                             }
+                        }
                             // { withCredentials: true }
                         );
                     }
@@ -383,26 +427,31 @@ export default function FeedbackForm() {
                 console.log(e)
             }
 
-            const feedback: Feedback = {
-                title: feedbackTitle,
-                recipientType: "partner",
-                recipientCount: recipientPartnerCount,
-                recipientList: recipientPartners,
-                feedbackItemCount: questionCount,
-                feedbackItems: questions,
-            }
-            console.log(feedback)
+            // const feedback: Feedback = {
+            //     title: feedbackTitle,
+            //     recipientType: "partner",
+            //     recipientCount: recipientPartnerCount,
+            //     recipientList: recipientPartners,
+            //     feedbackItemCount: questionCount,
+            //     feedbackItems: questions,
+            // }
+            // console.log(feedback)
         } else if (recipientCohortCount != 0) {
             try {
                 if (questionCount != 0) {
+                    const cohs = recipientCohorts.map(x => x.id)
                     const resp = await axios.post(
                         `http://localhost:5001/forms/create`,
                         {
                             "receipientType": "cohort",
-                            "receipientId": [1, 2],
+                            "receipientId": cohs,
                             "feedbackItemCount": recipientCohortCount,
                             "feedbackItems": questions,
+                        }, {
+                        headers: {
+                            Authorization: `bearer ${session.data?.user.auth_token}`
                         }
+                    }
                         // { withCredentials: true }
                     );
                     if (resp.data.id) {
@@ -412,11 +461,17 @@ export default function FeedbackForm() {
                                 "typeofnotification": "form",
                                 "Message": feedbackTitle,
                                 "form_id": resp.data.id,
-                                "receipient_id": [1, 2]
+                                "receipient_id": cohs
+                            }, {
+                            headers: {
+                                Authorization: `bearer ${session.data?.user.auth_token}`
                             }
+                        }
                             // { withCredentials: true }
-                        );
+                        )
                     }
+
+
 
                     console.log("The error is this:", resp.data)
                 }
@@ -424,15 +479,15 @@ export default function FeedbackForm() {
             } catch (e) {
                 console.log(e)
             }
-            const feedback: Feedback = {
-                title: feedbackTitle,
-                recipientType: "cohort",
-                recipientCount: recipientCohortCount,
-                recipientList: recipientCohorts,
-                feedbackItemCount: questionCount,
-                feedbackItems: questions,
-            }
-            console.log(feedback)
+            // const feedback: Feedback = {
+            //     title: feedbackTitle,
+            //     recipientType: "cohort",
+            //     recipientCount: recipientCohortCount,
+            //     recipientList: recipientCohorts,
+            //     feedbackItemCount: questionCount,
+            //     feedbackItems: questions,
+            // }
+            // console.log(feedback)
         }
         router.push('/dashboard')
 
@@ -594,25 +649,27 @@ export default function FeedbackForm() {
                                     <CommandList>
                                         <CommandEmpty>No recipient found.</CommandEmpty>
                                         <CommandGroup>
-                                            {partnerList.map((partner) => (
-                                                <CommandItem
-                                                    key={partner.id}
-                                                    value={partner.name}
-                                                    onSelect={(currentValue) => {
-                                                        AddPartner(currentValue)
-                                                        setValue(currentValue === value ? "" : currentValue)
-                                                        setOpen(false)
-                                                    }}
-                                                >
-                                                    {/* <Check
+                                            {partnerData.data && partnerData.data.constructor === Array && <div>
+                                                {partnerData.data.map((partner) => (
+                                                    <CommandItem
+                                                        key={partner.id}
+                                                        value={partner.user_id.name}
+                                                        onSelect={(currentValue) => {
+                                                            AddPartner(partner)
+                                                            setValue(currentValue === value ? "" : currentValue)
+                                                            setOpen(false)
+                                                        }}
+                                                    >
+                                                        {/* <Check
                                                         className={cn(
                                                             "mr-2 h-4 w-4",
                                                             value === partner.name ? "opacity-100" : "opacity-0"
                                                         )}
                                                     /> */}
-                                                    {partner.name}
-                                                </CommandItem>
-                                            ))}
+                                                        {partner.user_id.name}
+                                                    </CommandItem>
+                                                ))}
+                                            </div>}
                                         </CommandGroup>
                                     </CommandList>
                                 </Command>
@@ -623,25 +680,27 @@ export default function FeedbackForm() {
                                     <CommandList>
                                         <CommandEmpty>No recipient found.</CommandEmpty>
                                         <CommandGroup>
-                                            {cohortList.map((cohort) => (
-                                                <CommandItem
-                                                    key={cohort.id}
-                                                    value={cohort.name}
-                                                    onSelect={(currentValue) => {
-                                                        AddCohort(currentValue)
-                                                        setValue(currentValue === value ? "" : currentValue)
-                                                        setOpen(false)
-                                                    }}
-                                                >
-                                                    {/* <Check
+                                            {cohortData.data && cohortData.data.constructor === Array && <div>
+                                                {cohortData.data.map((cohort) => (
+                                                    <CommandItem
+                                                        key={cohort.id}
+                                                        value={cohort.name}
+                                                        onSelect={(currentValue) => {
+                                                            AddCohort(cohort)
+                                                            setValue(currentValue === value ? "" : currentValue)
+                                                            setOpen(false)
+                                                        }}
+                                                    >
+                                                        {/* <Check
                                                         className={cn(
                                                             "mr-2 h-4 w-4",
                                                             value === cohort.name ? "opacity-100" : "opacity-0"
                                                         )}
                                                     /> */}
-                                                    {cohort.name}
-                                                </CommandItem>
-                                            ))}
+                                                        {cohort.name}
+                                                    </CommandItem>
+                                                ))}
+                                            </div>}
                                         </CommandGroup>
                                     </CommandList>
                                 </Command>
@@ -704,7 +763,7 @@ export default function FeedbackForm() {
                         <div className="flex flex-wrap gap-2">
                             {recipientPartners?.map((value, index) => (
                                 <div key={index} className=" bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
-                                    <div>{value.name}</div>
+                                    <div>{value.user_id.name}</div>
                                     <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
                                 </div>
                             ))}

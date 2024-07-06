@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { AddVolunteer } from "@/components/admin/AddVolunteer"
 import { VolunteerTable } from "@/components/admin/VolunteerTable"
 import { columns, volunteerColumn } from "@/components/admin/VolunteerColumn"
+import { useSession } from 'next-auth/react'
+import { useFetch } from "@/lib/useFetch"
+
 export default function Page({
     params,
     searchParams,
@@ -13,7 +16,34 @@ export default function Page({
     params: { slug: string }
     searchParams: { [key: string]: string | string[] | undefined }
 }) {
-    const dat:volunteerColumn[] = [{ id: "101", name: "Someone" }, { id: "102", name: "Someone else" }]
+    const session = useSession();
+
+    interface user_id {
+        id: number,
+        name: string,
+        email: string,
+        role: string
+    }
+
+    interface poc {
+        id: number
+    }
+
+    interface vol {
+        id: number,
+        poc: poc,
+        user_id: user_id,
+    }
+
+    const { data, loading, error, refetch, abort } = useFetch<vol[]>(
+        `http://localhost:5001/user/volbyPoc/1`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
+    );
+
+    const dat: volunteerColumn[] = [{ id: "101", name: "Someone" }, { id: "102", name: "Someone else" }]
     return (
         <div className="container mx-auto my-6 px-2 lg:px-8">
             <div className="flex flex-col lg:flex-row items-start justify-between mb-2 py-4 rounded bg-primary text-white px-4">
@@ -23,13 +53,16 @@ export default function Page({
                 </div>
                 <div className="flex w-full flex-row justify-end">
                     <div className=" text-black">
-                        <AddVolunteer id={Number(params.slug)}/>
+                        <AddVolunteer id={Number(params.slug)} />
                     </div>
                 </div>
                 {/* <h1 className="rounded-sm text-xs bg-primary text-white p-1 font-bold pl-1 md:mr-5"></h1> */}
             </div>
             <div className="overflow-x-auto">
-                <VolunteerTable columns={columns} data={dat} />
+                {data && data.constructor === Array && <div>
+                    <VolunteerTable columns={columns} data={data} />
+                </div>}
+
             </div>
         </div>
     )

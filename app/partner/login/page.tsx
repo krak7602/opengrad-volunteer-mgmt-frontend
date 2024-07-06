@@ -6,8 +6,9 @@ export default function Page({
     searchParams,
 }: {
     params: { slug: string }
-    searchParams: { [key: string]: string | string[] | undefined }
+    searchParams: { [key: string]: string}
 }) {
+    const role = searchParams["role"]
     return (
         // <h1>Volunteer login page</h1>
         // <div className="flex items-center justify-center min-h-screen">
@@ -19,7 +20,7 @@ export default function Page({
                         <OpengradIcon className="h-6 w-6" />
                     </div>
                 </div>
-                <SignIn />
+                <SignIn curRole={role}/>
             </div>
         </div>
     )

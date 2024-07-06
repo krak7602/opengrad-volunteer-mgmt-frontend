@@ -10,6 +10,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import FeedbackForm from "@/components/admin/FeedbackForm"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 export default function Page({
@@ -22,8 +23,17 @@ export default function Page({
     const { data } = useSession();
     return (
         <div>
-            <FeedbackForm />
+            <Tabs defaultValue="new">
+                <TabsList>
+                    <TabsTrigger value="new">New Form</TabsTrigger>
+                    <TabsTrigger value="search">Search</TabsTrigger>
+                </TabsList>
+                <TabsContent value="new">
+                    <FeedbackForm />
+                </TabsContent>
+                <TabsContent value="search">Search for feedback</TabsContent>
+            </Tabs>
         </div>
-
+    
     )
 }

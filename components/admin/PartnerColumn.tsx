@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, CellContext } from "@tanstack/react-table"
 import {
     Drawer,
     DrawerClose,
@@ -33,17 +33,29 @@ export type partnerColumn = {
     name: string,
 }
 
-    interface poc {
-        id: number,
-        user_id: user_id,
-    }
+interface poc {
+    id: number,
+    user_id: user_id,
+}
 
-    interface user_id {
-        id: number,
-        name: string,
-        email: string,
-        role: string
+interface user_id {
+    id: number,
+    name: string,
+    email: string,
+    role: string
+}
+
+const CellComponent = (row: CellContext<poc, unknown>) => {
+    const router = useRouter()
+    const pushPage = (id: string) => {
+        router.push(`/partners/${id}`)
     }
+    const projectedData = row.getValue() as string;
+    // const val:slotItem = getValue()
+    return <Button onClick={() => { pushPage(projectedData) }}>
+        Details
+    </Button>
+}
 
 export const columns: ColumnDef<poc>[] = [
     {
@@ -60,22 +72,23 @@ export const columns: ColumnDef<poc>[] = [
         }
     },
     {
-        accessorKey: "user_id.id",
+        accessorKey: "id",
         header: "Details",
         meta: {
             align: 'right'
         },
-        cell: ({ getValue }) => {
-            const router = useRouter()
-            const pushPage = (id: string) => {
-                router.push(`/partners/${id}`)
-            }
-            const projectedData = getValue() as string;
-            // const val:slotItem = getValue()
-            return <Button onClick={() => { pushPage(projectedData) }}>
-                Details
-            </Button>
-        }
+        cell: CellComponent
+        // cell: ({ getValue }) => {
+        //     const router = useRouter()
+        //     const pushPage = (id: string) => {
+        //         router.push(`/partners/${id}`)
+        //     }
+        //     const projectedData = getValue() as string;
+        //     // const val:slotItem = getValue()
+        //     return <Button onClick={() => { pushPage(projectedData) }}>
+        //         Details
+        //     </Button>
+        // }
 
     }
 

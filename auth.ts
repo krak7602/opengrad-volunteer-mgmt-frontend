@@ -68,11 +68,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                             },
                             { withCredentials: true }
                         );
-                        const cookie = resp.headers["set-cookie"]
-                        console.log("The cookie found:", cookie)
-                        if(cookie) {
-                            const [nameValue, ...options] = cookie[0].split('; ');
-                            const [name, value] = nameValue.split('=');
+                        // const cookie = resp.headers["set-cookie"]
+                        // console.log("The cookie found:", cookie)
+                        // if(cookie) {
+                            // const [nameValue, ...options] = cookie[0].split('; ');
+                            // const [name, value] = nameValue.split('=');
 
                             // Initialize options object
                             // const cookieOptions:{path:string,expires:Date, httpOnly: boolean} ;
@@ -96,20 +96,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
                             // cookies().set(name, value, {path: "/", httpOnly: true})
                             // const full = cookies().get(name)
                             // const val = full?.name+"="+full?.value
-                            console.log("The cookie for axios:",cookie[0])
-                            localStorage.setItem("authCookie", cookie[0])
+                            // console.log("The cookie for axios:",cookie[0])
+                            // localStorage.setItem("authCookie", cookie[0])
                             // Set the cookie
                             // setCookie(name, value, {
                                 // res: resp,
 
                                 
                             // });
-                        }
+                        // }
 
                         // console.log("This is the data:",resp.data)
                         console.log(resp.data)
                         if (resp.data.message === "User logged in") {
-                            return { email: email, password: password, role: role, auth_id: resp.data.user.id }
+                            return { email: email, password: password, role: role, auth_id: resp.data.user.id, auth_token: resp.data.user.token }
                         }
                     } catch (e) {
                         console.log(e)
@@ -173,7 +173,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth(
         ],
         callbacks: {
             async jwt({ token, user }) {
-                // const Exteduser: ExtendedUser = user;
                 if (user) {
                     token.role = user.role;
                     token.auth_id = user.auth_id;

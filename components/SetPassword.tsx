@@ -32,13 +32,14 @@ import axios from "axios"
 
 
 
-export default function SetPassword({token}: {token:string}) {
+export default function SetPassword({ token }: { token: string }) {
     const router = useRouter()
     // const dispatch = useAppDispatch();
     // let curl = window.location.href
     // let curRole = curl.split("//")[1].split(".")[0]
     const [showPassword1, setShowPassword1] = React.useState(false)
     const [showPassword2, setShowPassword2] = React.useState(false)
+    const [confirmPassword, setConfirmPassword] = React.useState(false)
     const form = useForm<z.infer<typeof setPasswordSchema>>({
         resolver: zodResolver(setPasswordSchema),
         defaultValues: {
@@ -67,21 +68,23 @@ export default function SetPassword({token}: {token:string}) {
 
         if (password1 === password2) {
             try {
-                    const resp = await axios.post(
-                        `http://localhost:5001/auth/login/callback?token=${token}`,
-                        {
-                            "password": password1
-                        }
-                        // { withCredentials: true }
-                    );
+                const resp = await axios.post(
+                    `http://localhost:5001/auth/login/callback?token=${token}`,
+                    {
+                        "password": password1
+                    }
+                    // { withCredentials: true }
+                );
 
-                    console.log("The error is this:", resp.data)
-                
+                if(resp.data.id) setConfirmPassword(true);
+
+                console.log("The error is this:", resp.data)
+
                 // console.log("This is the data:",resp.data)
             } catch (e) {
                 console.log(e)
             }
-            
+
             // await signIn("credentials", { email: email, password: password, role: role, redirect: false })
 
             // await signIn("credentials", { redirect: false}, values)
@@ -103,18 +106,20 @@ export default function SetPassword({token}: {token:string}) {
 
 
     return (
-        <Form {...form}>
-            <Card>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <CardHeader className="flex flex-row justify-center">
-                        <CardTitle className="text-2xl font-bold">Set your password</CardTitle>
-                        {/* <CardDescription>
+        <div>
+            {!confirmPassword && <div>
+                <Form {...form}>
+                    <Card>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                            <CardHeader className="flex flex-row justify-center">
+                                <CardTitle className="text-2xl font-bold">Set your password</CardTitle>
+                                {/* <CardDescription>
                             Enter your email and password to access your volunteer account.
                         </CardDescription> */}
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {/* <FormField
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {/* <FormField
                                 control={form.control}
                                 name="password1"
                                 render={({ field }) => (
@@ -130,16 +135,16 @@ export default function SetPassword({token}: {token:string}) {
                                     </FormItem>
                                 )}
                             /> */}
-                            <FormField
-                                control={form.control}
-                                name="password1"
-                                render={({ field }) => (
-                                    <FormItem className="relative space-y-2">
-                                        <div className="flex items-center">
-                                            <FormLabel>Password</FormLabel>
-                                            {/* <ForgotPasswordPopup /> */}
+                                    <FormField
+                                        control={form.control}
+                                        name="password1"
+                                        render={({ field }) => (
+                                            <FormItem className="relative space-y-2">
+                                                <div className="flex items-center">
+                                                    <FormLabel>Password</FormLabel>
+                                                    {/* <ForgotPasswordPopup /> */}
 
-                                            {/* <Dialog>
+                                                    {/* <Dialog>
                                                 <DialogTrigger
                                                     className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50">
                                                     Forgot your password?
@@ -153,39 +158,39 @@ export default function SetPassword({token}: {token:string}) {
                                                     </DialogHeader>
                                                 </DialogContent>
                                             </Dialog> */}
-                                            {/* <Link
+                                                    {/* <Link
                                                 className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                                                 href="#">
                                                 Forgot your password?
                                             </Link> */}
-                                        </div>
-                                        <FormControl>
-                                            <div>
-                                                <Input placeholder="" {...field} required type={showPassword1 ? "text" : "password"} />
-                                                <Button type="button" className="absolute top-7 right-1 h-7 w-7 " size="icon" variant="ghost" onClick={togglePasswordVisiblity1}>
-                                                    <EyeIcon className={showPassword1 ? "visible h-4 w-4" : "hidden"} />
-                                                    <EyeSlashIcon className={showPassword1 ? "hidden" : "visible h-4 w-4"} />
-                                                    <span className="sr-only">Toggle password visibility</span>
-                                                </Button>
-                                            </div>
-                                        </FormControl>
-                                        <FormDescription>
-                                            {/* Provide a Password. */}
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="password2"
-                                render={({ field }) => (
-                                    <FormItem className="relative space-y-2">
-                                        <div className="flex items-center">
-                                            <FormLabel>Confirm password</FormLabel>
-                                            {/* <ForgotPasswordPopup /> */}
+                                                </div>
+                                                <FormControl>
+                                                    <div>
+                                                        <Input placeholder="" {...field} required type={showPassword1 ? "text" : "password"} />
+                                                        <Button type="button" className="absolute top-7 right-1 h-7 w-7 " size="icon" variant="ghost" onClick={togglePasswordVisiblity1}>
+                                                            <EyeIcon className={showPassword1 ? "visible h-4 w-4" : "hidden"} />
+                                                            <EyeSlashIcon className={showPassword1 ? "hidden" : "visible h-4 w-4"} />
+                                                            <span className="sr-only">Toggle password visibility</span>
+                                                        </Button>
+                                                    </div>
+                                                </FormControl>
+                                                <FormDescription>
+                                                    {/* Provide a Password. */}
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="password2"
+                                        render={({ field }) => (
+                                            <FormItem className="relative space-y-2">
+                                                <div className="flex items-center">
+                                                    <FormLabel>Confirm password</FormLabel>
+                                                    {/* <ForgotPasswordPopup /> */}
 
-                                            {/* <Dialog>
+                                                    {/* <Dialog>
                                                 <DialogTrigger
                                                     className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50">
                                                     Forgot your password?
@@ -199,39 +204,45 @@ export default function SetPassword({token}: {token:string}) {
                                                     </DialogHeader>
                                                 </DialogContent>
                                             </Dialog> */}
-                                            {/* <Link
+                                                    {/* <Link
                                                 className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                                                 href="#">
                                                 Forgot your password?
                                             </Link> */}
-                                        </div>
-                                        <FormControl>
-                                            <div>
-                                                <Input placeholder="" {...field} required type={showPassword2 ? "text" : "password"} />
-                                                <Button type="button" className="absolute top-7 right-1 h-7 w-7 " size="icon" variant="ghost" onClick={togglePasswordVisiblity2}>
-                                                    <EyeIcon className={showPassword2 ? "visible h-4 w-4" : "hidden"} />
-                                                    <EyeSlashIcon className={showPassword2 ? "hidden" : "visible h-4 w-4"} />
-                                                    <span className="sr-only">Toggle password visibility</span>
-                                                </Button>
-                                            </div>
-                                        </FormControl>
-                                        <FormDescription>
-                                            {/* Provide a Password. */}
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button className="w-full" type="submit">Confirm</Button>
-                    </CardFooter>
-                </form>
-            </Card>
-        </Form>
+                                                </div>
+                                                <FormControl>
+                                                    <div>
+                                                        <Input placeholder="" {...field} required type={showPassword2 ? "text" : "password"} />
+                                                        <Button type="button" className="absolute top-7 right-1 h-7 w-7 " size="icon" variant="ghost" onClick={togglePasswordVisiblity2}>
+                                                            <EyeIcon className={showPassword2 ? "visible h-4 w-4" : "hidden"} />
+                                                            <EyeSlashIcon className={showPassword2 ? "hidden" : "visible h-4 w-4"} />
+                                                            <span className="sr-only">Toggle password visibility</span>
+                                                        </Button>
+                                                    </div>
+                                                </FormControl>
+                                                <FormDescription>
+                                                    {/* Provide a Password. */}
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button className="w-full" type="submit">Confirm</Button>
+                            </CardFooter>
+                        </form>
+                    </Card>
+                </Form>
+            </div>}
+            {confirmPassword && <div>
+                <div>
+                    <CheckmarkCircleIcon className="mx-auto my-5" />
+                    <div className="px-4 text-center text-neutral-600">Password has been successfully set.</div>
+                </div>
+            </div>}
+        </div>
     )
 }
 
@@ -248,4 +259,11 @@ const EyeSlashIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <path d="M9.85786 10C9.32783 10.53 9 11.2623 9 12.0711C9 13.6887 10.3113 15 11.9289 15C12.7377 15 13.47 14.6722 14 14.1421" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+);
+
+const CheckmarkCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+    <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 11.3151 21.9311 10.6462 21.8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M8 12.5C8 12.5 9.5 12.5 11.5 16C11.5 16 17.0588 6.83333 22 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
 );

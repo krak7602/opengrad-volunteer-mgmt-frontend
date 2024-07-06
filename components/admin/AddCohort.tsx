@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
@@ -49,20 +49,57 @@ import {
     CommandList,
     CommandSeparator
 } from "@/components/ui/command"
+import { useSession } from 'next-auth/react'
+import { useFetch } from "@mantine/hooks"
 
+interface poc_user_id {
+    id: number,
+    name: string,
+    email: string,
+    role: string,
+}
 
+interface poc {
+    id: number,
+    user_id: poc_user_id
+}
+
+interface partner {
+    id: number,
+    name: string,
+}
 export function AddCohort() {
+    const session = useSession();
     const [open, setOpen] = React.useState(false)
     const isDesktop = useMediaQuery("(min-width: 768px)")
     const [orgName, setOrgName] = React.useState("")
     const [fromDate, setFromDate] = React.useState<Date>();
     const [toDate, setToDate] = React.useState<Date>();
-    const [recipientPartners, setRecipientPartners] = useListState<partner>([])
+    const [recipientPartners, setRecipientPartners] = useListState<poc>([])
     const [recipientPartnerCount, setRecipientPartnerCount] = useState(0)
-    interface partner {
-        id: number,
-        name: string,
+    // interface poc_user_id {
+    //     id: number,
+    //     name: string,
+    //     email: string,
+    //     role: string,
+    // }
+
+    // interface poc {
+    //     id: number,
+    //     user_id: poc_user_id
+    // }
+
+    // interface partner {
+    //     id: number,
+    //     name: string,
+    // }
+    const { data, loading, error, refetch, abort } = useFetch<poc[]>(
+        `http://localhost:5001/user/get/poc`, {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
     }
+    );
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -71,7 +108,7 @@ export function AddCohort() {
             console.log("From:",)
             console.log("To:",)
         }
-
+        const pocs = recipientPartners.map(element => element.id)
         try {
             if (fromDate && toDate && orgName !== "") {
                 const resp = await axios.post(
@@ -80,7 +117,7 @@ export function AddCohort() {
                         "name": orgName,
                         "startDate": `${fromDate.getDate()}-${fromDate.getMonth() + 1}-${fromDate.getFullYear()}`,
                         "endDate": `${toDate.getDate()}-${toDate.getMonth() + 1}-${toDate.getFullYear()}`,
-                        "poc": [1]
+                        "poc": pocs
                     }
                     // { withCredentials: true }
                 );
@@ -93,33 +130,44 @@ export function AddCohort() {
         }
     }
 
-    const partnerList: partner[] = [
+    // const partnerList: partner[] = [
+    //     {
+    //         id: 112,
+    //         name: "NIT Trichy",
+    //     },
+    //     {
+    //         id: 113,
+    //         name: "NIT Suratkal",
+    //     },
+    //     {
+    //         id: 114,
+    //         name: "NIT Calicut",
+    //     },
+    //     {
+    //         id: 115,
+    //         name: "IIT Kharagpur",
+    //     },
+    // ]
+    const partnerList: poc[] = [
         {
-            id: 112,
-            name: "NIT Trichy",
-        },
-        {
-            id: 113,
-            name: "NIT Suratkal",
-        },
-        {
-            id: 114,
-            name: "NIT Calicut",
-        },
-        {
-            id: 115,
-            name: "IIT Kharagpur",
-        },
+            "id": 1,
+            "user_id": {
+                "id": 2,
+                "name": "ParRahul1",
+                "email": "ogvpvujz7@mozmail.com",
+                "role": "poc"
+            }
+        }
     ]
 
     const AddPartner = (selectedPartner: string) => {
         let found = false
         recipientPartners?.forEach(element => {
-            if (element.name === selectedPartner) found = true;
+            if (element.user_id.name === selectedPartner) found = true;
         })
-        if (!found) {
-            partnerList.forEach(element => {
-                if (element.name === selectedPartner) {
+        if (!found && data) {
+            data.forEach(element => {
+                if (element.user_id.name === selectedPartner) {
                     // if (recipientPartnerCount === 0) {
                     //     const handlePartners: partner[] = [element]
                     //     setRecipientPartners(handlePartners)
@@ -145,6 +193,12 @@ export function AddCohort() {
         setRecipientPartners.remove(id)
         setRecipientPartnerCount(recipientPartnerCount - 1)
     }
+    // useEffect(() => {
+    //     if (data) {
+    //         // setResponseCount(data?.length);
+    //         console.log(data)
+    //     }
+    // }, [data]);
     // if (isDesktop) {
     //     return (
     //         <Dialog open={open} onOpenChange={setOpen}>
@@ -225,7 +279,7 @@ export function AddCohort() {
                                             <div className="flex flex-wrap gap-2">
                                                 {recipientPartners?.map((value, index) => (
                                                     <div key={index} className="bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
-                                                        <div>{value.name}</div>
+                                                        <div>{value.user_id.name}</div>
                                                         <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
                                                     </div>
                                                 ))}
@@ -236,25 +290,27 @@ export function AddCohort() {
                                             <CommandList >
                                                 <CommandEmpty>No recipient found.</CommandEmpty>
                                                 <CommandGroup className=" overflow-y-auto h-32 lg:h-56">
-                                                    {partnerList.map((partner) => (
-                                                        <CommandItem
-                                                            key={partner.id}
-                                                            value={partner.name}
-                                                            onSelect={(currentValue) => {
-                                                                AddPartner(currentValue)
-                                                                // setValue(currentValue === value ? "" : currentValue)
-                                                                // setOpen(false)
-                                                            }}
-                                                        >
-                                                            {/* <Check
+                                                    {data && data.constructor === Array && <div>
+                                                        {data.map((partner) => (
+                                                            <CommandItem
+                                                                key={partner.id}
+                                                                value={partner.user_id.name}
+                                                                onSelect={(currentValue) => {
+                                                                    AddPartner(currentValue)
+                                                                    // setValue(currentValue === value ? "" : currentValue)
+                                                                    // setOpen(false)
+                                                                }}
+                                                            >
+                                                                {/* <Check
                                                         className={cn(
                                                             "mr-2 h-4 w-4",
                                                             value === partner.name ? "opacity-100" : "opacity-0"
                                                         )}
                                                     /> */}
-                                                            {partner.name}
-                                                        </CommandItem>
-                                                    ))}
+                                                                {partner.user_id.name}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </div>}
                                                 </CommandGroup>
                                             </CommandList>
                                         </Command>
@@ -282,6 +338,14 @@ export function AddCohort() {
         </Drawer>
     )
 }
+
+// function SetItCommand(pocs:poc[]) {
+//     if(pocs.constructor===Array) {
+//         return (
+//             <div></div>
+//         )
+//     }
+// }
 
 function PartnerAddForm({ className }: React.ComponentProps<"form">) {
     const [openCommand, setOpenCommand] = React.useState(false)

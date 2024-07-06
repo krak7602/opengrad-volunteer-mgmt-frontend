@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/command"
 import { useFetch } from "@mantine/hooks"
 import { Skeleton } from "@/components/ui/skeleton"
-
+import { useSession } from 'next-auth/react'
 
 export default function CohortListing() {
+    const session = useSession();
     interface cohortColumn {
         id: number,
         name: string,
@@ -22,7 +23,11 @@ export default function CohortListing() {
         endDate: string,
     }
     const { data, loading, error, refetch, abort } = useFetch<cohortColumn[]>(
-        'http://localhost:5001/cohort/all'
+        'http://localhost:5001/cohort/all', {
+        headers: {
+            authorization: `bearer ${session.data?.user.auth_token}`
+        }
+    }
     );
 
     // const dat: cohortColumn[] = [{ id: "101", name: "GATE 2023" }, { id: "102", name: "NEET 2024" }]

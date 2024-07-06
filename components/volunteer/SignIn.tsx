@@ -29,10 +29,10 @@ import { ForgotPasswordPopup } from "@/components/volunteer/ForgotPasswordPopup"
 
 
 
-export default function SignIn() {
+export default function SignIn({curRole}: {curRole: string}) {
     const router = useRouter()
-    let curl = window.location.href
-    let curRole = curl.split("//")[1].split(".")[0]
+    // let curl = window.location.href
+    // let curRole = curl.split("//")[1].split(".")[0]
     const [showPassword, setShowPassword] = React.useState(false)
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),

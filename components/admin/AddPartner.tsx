@@ -24,9 +24,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from "axios"
+import { useSession, SessionProvider } from 'next-auth/react'
 
 export function AddPartner() {
     const [open, setOpen] = React.useState(false)
+
     const isDesktop = useMediaQuery("(min-width: 768px)")
 
     if (isDesktop) {
@@ -74,6 +76,7 @@ export function AddPartner() {
 function PartnerAddForm({ className }: React.ComponentProps<"form">) {
     const [orgName, setOrgName] = React.useState("")
     const [orgEmail, setOrgEmail] = React.useState("")
+    const session = useSession();
     const [send, setSend] = React.useState(false)
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -84,7 +87,11 @@ function PartnerAddForm({ className }: React.ComponentProps<"form">) {
                     {
                         "name": orgName,
                         "email": orgEmail
-                    },
+                    }, {
+                    headers: {
+                        Authorization: `bearer ${session.data?.user.auth_token}`
+                    }
+                }
                     // { withCredentials: true }
                 );
 
@@ -93,7 +100,11 @@ function PartnerAddForm({ className }: React.ComponentProps<"form">) {
                         `http://localhost:5001/auth/profileset`,
                         {
                             "destination": orgEmail
-                        },
+                        }, {
+                        headers: {
+                            Authorization: `bearer ${session.data?.user.auth_token}`
+                        }
+                    }
                         // { withCredentials: true }
                     );
                     if (resp.data.success) {

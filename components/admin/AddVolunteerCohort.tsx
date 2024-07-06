@@ -42,7 +42,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 
-export function AddStudent({ cohId }: { cohId: string }) {
+export function AddVolunteerCohort({ cohId }: { cohId: string }) {
     const [open, setOpen] = React.useState(false)
     const isDesktop = useMediaQuery("(min-width: 768px)")
     const [studName, setStudName] = React.useState("")

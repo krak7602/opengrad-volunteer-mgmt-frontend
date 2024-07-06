@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/drawer"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useSession } from 'next-auth/react'
 import axios from "axios"
 
 export function AddVolunteer({ id }: { id: number }) {
@@ -31,6 +32,7 @@ export function AddVolunteer({ id }: { id: number }) {
     const [volEmail, setVolEmail] = React.useState("")
     const [send, setSend] = React.useState(false)
     const isDesktop = useMediaQuery("(min-width: 768px)")
+    const session = useSession();
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
@@ -41,7 +43,11 @@ export function AddVolunteer({ id }: { id: number }) {
                         "name": volName,
                         "email": volEmail,
                         "Poc": id,
+                    }, {
+                    headers: {
+                        Authorization: `bearer ${session.data?.user.auth_token}`
                     }
+                }
                     // { withCredentials: true }
                 );
 
@@ -50,7 +56,11 @@ export function AddVolunteer({ id }: { id: number }) {
                         `http://localhost:5001/auth/profileset`,
                         {
                             "destination": volEmail
+                        }, {
+                        headers: {
+                            Authorization: `bearer ${session.data?.user.auth_token}`
                         }
+                    }
                         // { withCredentials: true }
                     );
                     if (resp.data.success) {
@@ -107,11 +117,11 @@ export function AddVolunteer({ id }: { id: number }) {
                         <form onSubmit={onSubmit} className="px-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
-                                <Input type="text" id="name" onChange={e => { setVolName(e.target.value) }}/>
+                                <Input type="text" id="name" onChange={e => { setVolName(e.target.value) }} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input type="email" id="email" onChange={e => { setVolEmail(e.target.value) }}/>
+                                <Input type="email" id="email" onChange={e => { setVolEmail(e.target.value) }} />
                             </div>
                             {/* <div className="grid gap-2">
                 <Label htmlFor="username"></Label>
