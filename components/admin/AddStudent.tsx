@@ -1,21 +1,12 @@
 import * as React from "react"
-
+import { useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button"
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
     DrawerFooter,
     DrawerHeader,
     DrawerTitle,
@@ -25,7 +16,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from "axios"
 import { useSession } from 'next-auth/react'
-import { useFetch } from "@mantine/hooks"
 import {
     Command,
     CommandEmpty,
@@ -33,7 +23,6 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-    CommandSeparator
 } from "@/components/ui/command"
 import {
     Accordion,
@@ -41,18 +30,45 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+interface user_id {
+    id: number,
+    name: string,
+    email: string,
+    role: string,
+}
 
-export function AddStudent({ cohId }: { cohId: string }) {
+interface vol {
+    id: number,
+    user_id: user_id,
+}
+
+interface vols {
+    id: number,
+    name: string,
+    startDate: number,
+    endDate: number,
+    vol: vol[]
+}
+
+export function AddStudent({ cohId, data }: { cohId: string, data: vols[] }) {
     const [open, setOpen] = React.useState(false)
-    const isDesktop = useMediaQuery("(min-width: 768px)")
     const [studName, setStudName] = React.useState("")
     const [studEmail, setStudEmail] = React.useState("")
     const [studPhone, setStudPhone] = React.useState("")
     const [volSelected, setVolSelected] = React.useState<vol>()
     const session = useSession();
     const [send, setSend] = React.useState(false)
+
+    interface user_id {
+        id: number,
+        name: string,
+        email: string,
+        role: string,
+    }
+
     interface vol {
-        id: number
+        id: number,
+        user_id: user_id,
     }
 
     interface vols {
@@ -62,67 +78,43 @@ export function AddStudent({ cohId }: { cohId: string }) {
         endDate: number,
         vol: vol[]
     }
-    const { data, loading, error, refetch, abort } = useFetch<vols[]>(
-        `http://localhost:5001/cohort/volByCohort/${cohId})}`, {
-        headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
+
+    useEffect(() => {
+        if (data) {
+            console.log(`cohid:${cohId}`)
+            console.log("The data is this:", data[0])
         }
-    }
-    );
+    }, [data]);
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
             if (studEmail && studName && studPhone) {
                 const resp = await axios.post(
-                    `http://localhost:5001/students/create`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/students/create`,
                     {
                         "name": studName,
                         "email": studEmail,
                         "phone": studPhone,
-                        "volId": 2,
+                        "volId": volSelected?.id,
                         "cohortId": Number(cohId)
                     }, {
                     headers: {
-                        Authorization: `bearer ${session.data?.user.auth_token}`
+                        Authorization: `Bearer ${session.data?.user.auth_token}`
                     }
                 }
-                    // { withCredentials: true }
                 );
 
-                if (resp.data.success) {
+                if (resp.data.id) {
                     setSend(true)
                 }
 
 
                 console.log("The error is this:", resp.data)
             }
-
-            // console.log("This is the data:",resp.data)
         } catch (e) {
             console.log(e)
         }
     }
-
-    // if (isDesktop) {
-    //     return (
-    //         <Dialog open={open} onOpenChange={setOpen}>
-    //             <DialogTrigger asChild>
-    //                 <Button variant="outline">
-    //                     <PlusIcon />
-    //                 </Button>
-    //             </DialogTrigger>
-    //             <DialogContent className="sm:max-w-[425px]">
-    //                 <DialogHeader>
-    //                     <DialogTitle>Add Volunteer</DialogTitle>
-    //                     {/* <DialogDescription>
-    //                         Make changes to your profile here. Click save when you're done.
-    //                     </DialogDescription> */}
-    //                 </DialogHeader>
-    //                 <StudentAddForm />
-    //             </DialogContent>
-    //         </Dialog>
-    //     )
-    // }
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
@@ -133,13 +125,15 @@ export function AddStudent({ cohId }: { cohId: string }) {
             </DrawerTrigger>
             <DrawerContent>
                 <DrawerHeader className="text-left">
-                    <DrawerTitle>Add Volunteer</DrawerTitle>
-                    {/* <DrawerDescription>
-                        Make changes to your profile here. Click save when you're done.
-                    </DrawerDescription> */}
+                    <DrawerTitle>Add Student</DrawerTitle>
                 </DrawerHeader>
-                {/* <StudentAddForm className="px-4" /> */}
-                <div className=" px-4">
+                <div>
+                    {send && <div className=" flex flex-col items-center gap-3">
+                        <CheckmarkCircleIcon className=" text-primary" />
+                        <div>Student has been added to cohort.</div>
+                    </div>}
+                </div>
+                {!send && <div className=" px-4">
                     <form onSubmit={onSubmit} className="grid items-start gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="name">Name</Label>
@@ -150,27 +144,17 @@ export function AddStudent({ cohId }: { cohId: string }) {
                             <Input type="email" id="email" onChange={e => { setStudEmail(e.target.value) }} />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="phone">Email</Label>
-                            <Input type="number" id="phone" maxLength={10} onChange={e => { setStudPhone(e.target.value) }} />
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input type="tel" id="phone" maxLength={10} onChange={e => { setStudPhone(e.target.value) }} />
                         </div>
                         <Accordion type="single" collapsible>
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
-                                    <Label htmlFor="enddate">Members</Label>
+                                    <Label htmlFor="enddate">Volunteer</Label>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    {/* <div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {data?.map((value, index) => (
-                                                <div key={index} className="bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
-                                                    <div>{value.name}</div>
-                                                    <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div> */}
                                     <Command >
-                                        <CommandInput placeholder="Select Volunteer" />
+                                        <CommandInput placeholder="Select Volunteer" value={volSelected?.user_id.name} />
                                         <CommandList >
                                             <CommandEmpty>No recipient found.</CommandEmpty>
                                             <CommandGroup className=" overflow-y-auto h-32 lg:h-56">
@@ -178,20 +162,13 @@ export function AddStudent({ cohId }: { cohId: string }) {
                                                     {data[0].vol.map((value) => (
                                                         <CommandItem
                                                             key={value.id}
-                                                            value={value.id.toString()}
+                                                            value={value.user_id.name}
                                                             onSelect={(currentValue) => {
                                                                 setVolSelected(value)
-                                                                // setValue(currentValue === value ? "" : currentValue)
-                                                                // setOpen(false)
+                                                                console.log(currentValue)
                                                             }}
                                                         >
-                                                            {/* <Check
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            value === partner.name ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    /> */}
-                                                            {value.id}
+                                                            {value.user_id.name}
                                                         </CommandItem>
                                                     ))}
                                                 </div>}
@@ -201,13 +178,9 @@ export function AddStudent({ cohId }: { cohId: string }) {
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
-                        {/* <div className="grid gap-2">
-                <Label htmlFor="username"></Label>
-                <Input id="username" defaultValue="@shadcn" />
-            </div> */}
                         <Button type="submit">Add</Button>
                     </form>
-                </div>
+                </div>}
                 <DrawerFooter className="pt-2">
                     <DrawerClose asChild>
                         <Button variant="outline">Cancel</Button>
@@ -218,70 +191,15 @@ export function AddStudent({ cohId }: { cohId: string }) {
     )
 }
 
-function StudentAddForm({ className }: React.ComponentProps<"form">) {
-    const [studName, setStudName] = React.useState("")
-    const [studEmail, setStudEmail] = React.useState("")
-    const [studPhone, setStudPhone] = React.useState("")
-    const session = useSession();
-    const [send, setSend] = React.useState(false)
-    const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        try {
-            if (studEmail && studName && studPhone) {
-                const resp = await axios.post(
-                    `http://localhost:5001/students/create`,
-                    {
-                        "name": studName,
-                        "email": studEmail,
-                        "phone": studPhone,
-                        "volId": 2,
-                        "cohortId": 1
-                    }, {
-                    headers: {
-                        Authorization: `bearer ${session.data?.user.auth_token}`
-                    }
-                }
-                    // { withCredentials: true }
-                );
-
-                if (resp.data.success) {
-                    setSend(true)
-                }
-
-
-                console.log("The error is this:", resp.data)
-            }
-
-            // console.log("This is the data:",resp.data)
-        } catch (e) {
-            console.log(e)
-        }
-    }
-    return (
-        <form onSubmit={onSubmit} className={cn("grid items-start gap-4", className)}>
-            <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input type="text" id="name" onChange={e => { setStudName(e.target.value) }} />
-            </div>
-            <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input type="email" id="email" onChange={e => { setStudEmail(e.target.value) }} />
-            </div>
-            <div className="grid gap-2">
-                <Label htmlFor="phone">Email</Label>
-                <Input type="number" id="phone" maxLength={10} onChange={e => { setStudPhone(e.target.value) }} />
-            </div>
-            {/* <div className="grid gap-2">
-                <Label htmlFor="username"></Label>
-                <Input id="username" defaultValue="@shadcn" />
-            </div> */}
-            <Button type="submit">Add</Button>
-        </form>
-    )
-}
-
 const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} fill={"none"} {...props}>
         <path d="M12 4V20M20 12H4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+const CheckmarkCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+        <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 11.3151 21.9311 10.6462 21.8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M8 12.5C8 12.5 9.5 12.5 11.5 16C11.5 16 17.0588 6.83333 22 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );

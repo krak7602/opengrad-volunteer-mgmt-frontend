@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
+import { VolunteerDetails } from "@/components/partner/VolunteerDetails"
 
 // export type volunteerColumn = {
 //     id: string,
@@ -19,28 +20,28 @@ import { useRouter } from 'next/navigation'
 // export type volunteerColumn = {
 //     id: string,
 //     name: string,
-// }
-
-interface vol {
-    id: number
-}
-
-// interface user_id {
-//     id: number,
-//     name: string,
-//     email: string,
-//     role: string
-// }
-
-// interface poc {
-//     id: number
 // }
 
 // interface vol {
-//     id: number,
-//     poc: poc,
-//     user_id: user_id,
+//     id: number
 // }
+
+interface user_id {
+    id: number,
+    name: string,
+    email: string,
+    role: string
+}
+
+interface poc {
+    id: number
+}
+
+interface vol {
+    id: number,
+    poc: poc,
+    user_id: user_id,
+}
 // interface vol {
 //     id: number
 // }
@@ -57,15 +58,16 @@ const CellComponent = (row: CellContext<vol, unknown>) => {
     const router = useRouter()
     const projectedData = row.getValue() as string;
     // const val:slotItem = getValue()
-    return <Button onClick={() => { router.push(`/volunteers/${projectedData}`) }}>
-        Details
-    </Button>
+    return <VolunteerDetails volId={Number(projectedData)} />
+    // return <Button onClick={() => { router.push(`/volunteers/${projectedData}`) }}>
+    //     Details
+    // </Button>
 }
 
 
 export const columns: ColumnDef<vol>[] = [
     {
-        accessorKey: "id",
+        accessorKey: "user_id.name",
         header: "Name",
         meta: {
             align: 'left'

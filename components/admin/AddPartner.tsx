@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -15,7 +14,6 @@ import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
     DrawerFooter,
     DrawerHeader,
     DrawerTitle,
@@ -24,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from "axios"
-import { useSession, SessionProvider } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 
 export function AddPartner() {
     const [open, setOpen] = React.useState(false)
@@ -40,9 +38,6 @@ export function AddPartner() {
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Add Partner</DialogTitle>
-                        {/* <DialogDescription>
-                            Make changes to your profile here. Click save when you're done.
-                        </DialogDescription> */}
                     </DialogHeader>
                     <PartnerAddForm />
                 </DialogContent>
@@ -58,9 +53,6 @@ export function AddPartner() {
             <DrawerContent>
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Add Partner</DrawerTitle>
-                    {/* <DrawerDescription>
-                        Make changes to your profile here. Click save when you're done.
-                    </DrawerDescription> */}
                 </DrawerHeader>
                 <PartnerAddForm className="px-4" />
                 <DrawerFooter className="pt-2">
@@ -83,29 +75,27 @@ function PartnerAddForm({ className }: React.ComponentProps<"form">) {
         try {
             if (orgEmail && orgName) {
                 const resp = await axios.post(
-                    `http://localhost:5001/user/pocinvite`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/pocinvite`,
                     {
                         "name": orgName,
                         "email": orgEmail
                     }, {
                     headers: {
-                        Authorization: `bearer ${session.data?.user.auth_token}`
+                        authorization: `Bearer ${session.data?.user.auth_token}`
                     }
                 }
-                    // { withCredentials: true }
                 );
 
                 if (resp.data.id) {
                     const resp = await axios.post(
-                        `http://localhost:5001/auth/profileset`,
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/profileset`,
                         {
                             "destination": orgEmail
                         }, {
                         headers: {
-                            Authorization: `bearer ${session.data?.user.auth_token}`
+                            authorization: `Bearer ${session.data?.user.auth_token}`
                         }
                     }
-                        // { withCredentials: true }
                     );
                     if (resp.data.success) {
                         setSend(true)
@@ -115,7 +105,6 @@ function PartnerAddForm({ className }: React.ComponentProps<"form">) {
                 console.log("The error is this:", resp.data)
             }
 
-            // console.log("This is the data:",resp.data)
         } catch (e) {
             console.log(e)
         }
@@ -136,10 +125,6 @@ function PartnerAddForm({ className }: React.ComponentProps<"form">) {
                         <Label htmlFor="name">Email</Label>
                         <Input type="email" id="email" onChange={e => { setOrgEmail(e.target.value) }} />
                     </div>
-                    {/* <div className="grid gap-2">
-                <Label htmlFor="username"></Label>
-                <Input id="username" defaultValue="@shadcn" />
-            </div> */}
                     <Button type="submit">Add</Button>
                 </form>
             </div>}

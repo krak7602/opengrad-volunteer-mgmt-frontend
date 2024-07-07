@@ -1,6 +1,6 @@
 import { CohortTable } from "@/components/partner/CohortTable"
 import { columns } from "@/components/partner/CohortColumn"
-import { useFetch } from "@mantine/hooks"
+import { useFetch } from "@/lib/useFetch"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from 'next-auth/react'
 
@@ -19,12 +19,11 @@ export default function CohortListing() {
     }
 
     const { data, loading, error, refetch, abort } = useFetch<cohortColumn[]>(
-        `http://localhost:5001/cohort/poc/${session.data?.user.auth_token}`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cohort/poc/${session.data?.user.auth_id}`, {
         headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
-        }
-    }
-    );
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke:true,
+    },[session]);
     // const dat: cohortColumn[] = [{ id: "101", name: "GATE 2023" }, { id: "102", name: "NEET 2024" }]
     return (
         <div className="container mx-auto my-6 px-2 lg:px-8">
@@ -32,7 +31,7 @@ export default function CohortListing() {
             <div className="flex flex-col lg:flex-row items-start justify-between mb-2 pt-4 pb-6 rounded bg-primary text-white px-4">
                 <div className=" pb-1">
                     <h1 className="text-2xl font-bold">Cohorts</h1>
-                    <div className=" text-xs text-primary bg-white rounded-full text-center px-2 mt-1 w-fit">Members</div>
+                    {/* <div className=" text-xs text-primary bg-white rounded-full text-center px-2 mt-1 w-fit">Members</div> */}
                 </div>
                 {/* <div className="flex w-full flex-row justify-end">
                         <div className=" text-black">

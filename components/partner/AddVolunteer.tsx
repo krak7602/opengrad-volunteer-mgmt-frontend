@@ -38,14 +38,14 @@ export function AddVolunteer() {
         try {
             if (volEmail && volName) {
                 const resp = await axios.post(
-                    `http://localhost:5001/user/volinvite`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/volinvite`,
                     {
                         "name": volName,
                         "email": volEmail,
-                        "Poc": session.data?.user.id,
+                        "Poc": session.data?.user.auth_id,
                     }, {
                     headers: {
-                        Authorization: `bearer ${session.data?.user.auth_token}`
+                        authorization: `Bearer ${session.data?.user.auth_token}`
                     }
                 }
                     // { withCredentials: true }
@@ -53,12 +53,12 @@ export function AddVolunteer() {
 
                 if (resp.data.id) {
                     const resp = await axios.post(
-                        `http://localhost:5001/auth/profileset`,
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/profileset`,
                         {
                             "destination": volEmail
                         }, {
                         headers: {
-                            Authorization: `bearer ${session.data?.user.auth_token}`
+                            authorization: `Bearer ${session.data?.user.auth_token}`
                         }
                     }
                         // { withCredentials: true }
@@ -113,8 +113,8 @@ export function AddVolunteer() {
                         <SentIcon className=" text-primary" />
                         <div>Partner invite has been send successfully.</div>
                     </div>}
-                    {!send && <div>
-                        <form onSubmit={onSubmit} className="px-4">
+                    {!send && <div className=" px-2 w-full">
+                        <form onSubmit={onSubmit} className="px-4 flex flex-col gap-3">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input type="text" id="name" onChange={e => { setVolName(e.target.value) }} />

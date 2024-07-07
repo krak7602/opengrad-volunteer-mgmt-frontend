@@ -1,21 +1,9 @@
 import * as React from "react"
-
-import { cn } from "@/lib/utils"
-import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
     DrawerFooter,
     DrawerHeader,
     DrawerTitle,
@@ -31,37 +19,34 @@ export function AddVolunteer({ id }: { id: number }) {
     const [volName, setVolName] = React.useState("")
     const [volEmail, setVolEmail] = React.useState("")
     const [send, setSend] = React.useState(false)
-    const isDesktop = useMediaQuery("(min-width: 768px)")
     const session = useSession();
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
             if (volEmail && volName) {
                 const resp = await axios.post(
-                    `http://localhost:5001/user/volinvite`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/volinvite`,
                     {
                         "name": volName,
                         "email": volEmail,
                         "Poc": id,
                     }, {
                     headers: {
-                        Authorization: `bearer ${session.data?.user.auth_token}`
+                        authorization: `Bearer ${session.data?.user.auth_token}`
                     }
                 }
-                    // { withCredentials: true }
                 );
 
                 if (resp.data.id) {
                     const resp = await axios.post(
-                        `http://localhost:5001/auth/profileset`,
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/profileset`,
                         {
                             "destination": volEmail
                         }, {
                         headers: {
-                            Authorization: `bearer ${session.data?.user.auth_token}`
+                            authorization: `Bearer ${session.data?.user.auth_token}`
                         }
                     }
-                        // { withCredentials: true }
                     );
                     if (resp.data.success) {
                         setSend(true)
@@ -70,51 +55,27 @@ export function AddVolunteer({ id }: { id: number }) {
 
                 console.log("The error is this:", resp.data)
             }
-
-            // console.log("This is the data:",resp.data)
         } catch (e) {
             console.log(e)
         }
     }
 
-    // if (isDesktop) {
-    //     return (
-    //         <Dialog open={open} onOpenChange={setOpen}>
-    //             <DialogTrigger asChild>
-    //                 <Button variant="outline">Add Volunteer</Button>
-    //             </DialogTrigger>
-    //             <DialogContent className="sm:max-w-[425px]">
-    //                 <DialogHeader>
-    //                     <DialogTitle>Add Volunteer</DialogTitle>
-    //                     {/* <DialogDescription>
-    //                         Make changes to your profile here. Click save when you're done.
-    //                     </DialogDescription> */}
-    //                 </DialogHeader>
-    //                 <VolunteerAddForm />
-    //             </DialogContent>
-    //         </Dialog>
-    //     )
-    // }
-
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={setOpen} >
             <DrawerTrigger asChild>
                 <Button variant="outline">Add Volunteer</Button>
             </DrawerTrigger>
-            <DrawerContent>
+            <DrawerContent >
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Add Volunteer</DrawerTitle>
-                    {/* <DrawerDescription>
-                        Make changes to your profile here. Click save when you're done.
-                    </DrawerDescription> */}
                 </DrawerHeader>
                 <div>
                     {send && <div className=" flex flex-col items-center gap-3">
                         <SentIcon className=" text-primary" />
                         <div>Partner invite has been send successfully.</div>
                     </div>}
-                    {!send && <div>
-                        <form onSubmit={onSubmit} className="px-4">
+                    {!send && <div className=" px-2 w-full">
+                        <form onSubmit={onSubmit} className="px-4 flex flex-col gap-3">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input type="text" id="name" onChange={e => { setVolName(e.target.value) }} />
@@ -123,16 +84,10 @@ export function AddVolunteer({ id }: { id: number }) {
                                 <Label htmlFor="email">Email</Label>
                                 <Input type="email" id="email" onChange={e => { setVolEmail(e.target.value) }} />
                             </div>
-                            {/* <div className="grid gap-2">
-                <Label htmlFor="username"></Label>
-                <Input id="username" defaultValue="@shadcn" />
-            </div> */}
                             <Button type="submit">Add</Button>
                         </form>
                     </div>}
                 </div>
-
-                {/* <VolunteerAddForm className="px-4" /> */}
                 <DrawerFooter className="pt-2">
                     <DrawerClose asChild>
                         <Button variant="outline">Cancel</Button>
@@ -150,62 +105,3 @@ const SentIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <path d="M11.5 12.5L15 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
-
-
-// function VolunteerAddForm({ className }: React.ComponentProps<"form">) {
-//     const [volName, setVolName] = React.useState("")
-//     const [volEmail, setVolEmail] = React.useState("")
-//     const [send, setSend] = React.useState(false)
-//     const onSubmit = (e: React.FormEvent) => {
-//         e.preventDefault()
-//         try {
-//             if (volEmail && volName) {
-//                 const resp = await axios.post(
-//                     `http://localhost:5001/user/volinvite`,
-//                     {
-//                         "name": volName,
-//                         "email": volEmail,
-//                         "Poc": id,
-//                     }
-//                     // { withCredentials: true }
-//                 );
-
-//                 if (resp.data.id) {
-//                     const resp = await axios.post(
-//                         `http://localhost:5001/auth/profileset`,
-//                         {
-//                             "destination": orgEmail
-//                         }
-//                         // { withCredentials: true }
-//                     );
-//                     if (resp.data.success) {
-//                         setSend(true)
-//                     }
-//                 }
-
-//                 console.log("The error is this:", resp.data)
-//             }
-
-//             // console.log("This is the data:",resp.data)
-//         } catch (e) {
-//             console.log(e)
-//         }
-//     }
-//     return (
-//         <form onSubmit={onSubmit} className={cn("grid items-start gap-4", className)}>
-//             <div className="grid gap-2">
-//                 <Label htmlFor="name">Name</Label>
-//                 <Input type="text" id="name" />
-//             </div>
-//             <div className="grid gap-2">
-//                 <Label htmlFor="email">Email</Label>
-//                 <Input type="email" id="email" />
-//             </div>
-//             {/* <div className="grid gap-2">
-//                 <Label htmlFor="username"></Label>
-//                 <Input id="username" defaultValue="@shadcn" />
-//             </div> */}
-//             <Button type="submit">Add</Button>
-//         </form>
-//     )
-// }

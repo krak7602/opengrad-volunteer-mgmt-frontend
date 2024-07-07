@@ -2,21 +2,10 @@ import React, {useState} from "react";
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
-// { handleSlotFieldChange, handleTimeChange, index }: { handleSlotFieldChange: (e: React.ChangeEvent<HTMLTextAreaElement>, index: number, field: string) => void, handleTimeChange: (value: string, index: number, field: string, pos:string) => void, index: number }
-
-
 export default function Question({ handleDescChange, handleOptionsChange, handleAddOption, RemoveQuestion, type,index, optionCount }: { handleDescChange: (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void, handleOptionsChange: (e: React.ChangeEvent<HTMLTextAreaElement>, qnIndex: number, optIndex: number) => void, handleAddOption:(index: number) => void, RemoveQuestion:(id: number)=>void, type: string,  index: number,optionCount: number }) {
-    // const [feedback, setFeedback] = useState<FeedbackItem>({
-    //     type: type,
-    //     question: "",
-    //     option_count: optionCount,
-    //     options: []
-    // })
-
     return (
         <div className="rounded-sm bg-gray-100 border p-2">
             <div className=" flex flex-col">
-                {/* <div>{index+1}.</div> */}
                 <div>This is there</div>
                 <div className="flex flex-row justify-between items-center pb-1">
                     <div className=' font-light text-xs px-1'>{index + 1}</div>
@@ -26,7 +15,6 @@ export default function Question({ handleDescChange, handleOptionsChange, handle
                     {type === "mcq" && <div className=' font-light text-xs'>
                         Multiple Choice
                     </div>}
-                    {/* <div className=' font-light text-xs'>Descriptive</div> */}
                     <CancelIconLight className='font-light text-xs h-3' onClick={() => RemoveQuestion(index)} />
                 </div>
 

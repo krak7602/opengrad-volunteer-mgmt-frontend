@@ -1,32 +1,6 @@
 import { ColumnDef, CellContext } from "@tanstack/react-table"
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
-
-
-// export type slotItem = {
-//     id: number,
-//     hourStart: string,
-//     minStart: string,
-//     hourEnd: string,
-//     minEnd: string,
-//     activity: string,
-//     details: string,
-// }
-
-// export type logDay = {
-//     date?: Date,
-//     slots?: slotItem[],
-// }
 
 export type partnerColumn = {
     id: string,
@@ -51,7 +25,6 @@ const CellComponent = (row: CellContext<poc, unknown>) => {
         router.push(`/partners/${id}`)
     }
     const projectedData = row.getValue() as string;
-    // const val:slotItem = getValue()
     return <Button onClick={() => { pushPage(projectedData) }}>
         Details
     </Button>
@@ -78,18 +51,6 @@ export const columns: ColumnDef<poc>[] = [
             align: 'right'
         },
         cell: CellComponent
-        // cell: ({ getValue }) => {
-        //     const router = useRouter()
-        //     const pushPage = (id: string) => {
-        //         router.push(`/partners/${id}`)
-        //     }
-        //     const projectedData = getValue() as string;
-        //     // const val:slotItem = getValue()
-        //     return <Button onClick={() => { pushPage(projectedData) }}>
-        //         Details
-        //     </Button>
-        // }
-
     }
 
 ]

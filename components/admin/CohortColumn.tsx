@@ -1,14 +1,4 @@
-import { Cell, CellContext, ColumnDef } from "@tanstack/react-table"
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer"
+import { CellContext, ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
 import { Getter } from "jotai"
@@ -26,7 +16,6 @@ const CellComponent = (row: CellContext<cohortColumn, unknown>) => {
         router.push(`/cohorts/${id}`)
     }
     const projectedData = row.getValue() as string;
-    // const val:slotItem = getValue()
     return <Button onClick={() => { pushPage(projectedData) }}>
         Details
     </Button>

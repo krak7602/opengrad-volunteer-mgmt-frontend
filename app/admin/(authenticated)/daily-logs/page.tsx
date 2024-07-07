@@ -1,19 +1,8 @@
 "use client"
-import { SessionProvider } from "next-auth/react"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import FeedbackForm from "@/components/admin/FeedbackForm"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSession } from 'next-auth/react'
 import { useFetch } from "@/lib/useFetch"
 import { useListState } from "@mantine/hooks"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
     Command,
     CommandEmpty,
@@ -72,31 +61,12 @@ export default function Page({
     const [psOpen, setPSOpen] = useState(false)
     const [vsOpen, setVSOpen] = useState(false)
     const partnersData = useFetch<poc[]>(
-        `http://localhost:5001/user/get/poc`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/get/poc`, {
         headers: {
             authorization: `bearer ${session.data?.user.auth_token}`
         }
     }
     );
-
-
-
-    useEffect(() => {
-        if (selectedPartner) {
-            // // setResponseCount(data?.length);
-            // console.log(data)
-            const volunteersData = useFetch<vol[]>(
-                `http://localhost:5001/user/volbyPoc/${selectedPartner.id}`, {
-                headers: {
-                    authorization: `bearer ${session.data?.user.auth_token}`
-                }
-            }
-            );
-            if (volunteersData.data) {
-                setVolData.setState(volunteersData.data)
-            }
-        }
-    }, [selectedPartner]);
 
     return (
         <div className="container mx-auto my-6 px-2 lg:px-8">
@@ -105,23 +75,12 @@ export default function Page({
                     <Button
                         variant="outline"
                         role="combobox"
-                        // aria-expanded={open}
                         aria-expanded={psOpen}
                         className="lg:w-fit w-full font-light py-3 rounded-lg px-3  mb-2 flex justify-center items-center mr-2">
-                        {/* <PlusIcon className="h-4 w-4" /> */}
                         <div className="hidden md:block mx-2">
                             Select Partner
                         </div>
                     </Button>
-                    {/* <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={open}
-                                    className="w-[200px] justify-between mb-2"s
-                                >
-                                    Add Recipient...
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button> */}
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                     <Command>
@@ -134,18 +93,10 @@ export default function Page({
                                         key={pt.id}
                                         value={pt.user_id.name}
                                         onSelect={(currentValue) => {
-                                            // AddCohort(currentValue)
                                             setSelectedPartner(pt)
-                                            // setValue(currentValue === value ? "" : currentValue)
                                             setPSOpen(false)
                                         }}
                                     >
-                                        {/* <Check
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            value === cohort.name ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    /> */}
                                         {selectedPartner?.user_id.name}
                                     </CommandItem>
                                 ))}
@@ -159,23 +110,12 @@ export default function Page({
                     <Button
                         variant="outline"
                         role="combobox"
-                        // aria-expanded={open}
                         aria-expanded={vsOpen}
                         className="lg:w-fit w-full font-light py-3 rounded-lg px-3  mb-2 flex justify-center items-center mr-2">
-                        {/* <PlusIcon className="h-4 w-4" /> */}
                         <div className="hidden md:block mx-2">
                             Select Volunteer
                         </div>
                     </Button>
-                    {/* <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={open}
-                                    className="w-[200px] justify-between mb-2"s
-                                >
-                                    Add Recipient...
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button> */}
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                     <Command>
@@ -188,18 +128,10 @@ export default function Page({
                                         key={vl.id}
                                         value={vl.user_id.name}
                                         onSelect={(currentValue) => {
-                                            // AddCohort(currentValue)
                                             setSelectedVolunteer(vl)
-                                            // setValue(currentValue === value ? "" : currentValue)
                                             setPSOpen(false)
                                         }}
                                     >
-                                        {/* <Check
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            value === cohort.name ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    /> */}
                                         {selectedVolunteer?.user_id.name}
                                     </CommandItem>
                                 ))}

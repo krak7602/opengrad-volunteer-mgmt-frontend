@@ -1,16 +1,13 @@
 "use client"
 import React, { useState } from "react"
-import { useListState } from "@mantine/hooks"
-import { Button } from "@/components/ui/button"
-// import PartnerListing from "@/components/admin/PartnerListing"
-// import { AddStudent } from "@/components/admin/AddStudent"
 import { VolunteerTable } from "@/components/partner/VolunteerTable"
-import { columns } from "@/components/partner/VolunteerColumn"
+import { columns } from "@/components/partner/VolunteerColumnCohort"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSession } from 'next-auth/react'
 import { useFetch } from "@/lib/useFetch"
 import { StudentTable } from "@/components/partner/StudentTable"
-import { columns as studentColumns } from "@/components/admin/StudentColumn"
+import { columns as studentColumns } from "@/components/partner/StudentColumn"
+import { AssignVolunteer } from "@/components/partner/AssignVolunteer"
 export default function Page({
     params,
     searchParams,
@@ -19,8 +16,16 @@ export default function Page({
     searchParams: { [key: string]: string | string[] | undefined }
 }) {
     const session = useSession();
+    interface user_id {
+        id: number,
+        name: string,
+        email: string,
+        role: string,
+    }
+
     interface vol {
-        id: number
+        id: number,
+        user_id: user_id,
     }
 
     interface vols {
@@ -31,6 +36,7 @@ export default function Page({
         vol: vol[]
     }
 
+
     interface student {
         id: number,
         name: string,
@@ -40,45 +46,43 @@ export default function Page({
         cohortId: number
     }
 
+
+
     const { data, loading, error, refetch, abort } = useFetch<vols[]>(
-        `http://localhost:5001/cohort/volByCohort/${session.data?.user.id}`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cohort/volByCohort/${session.data?.user.auth_id}`, {
         headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
-        }
-    }
-    );
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke: true,
+    }, [session]);
 
     const dataStudents = useFetch<student[]>(
-        `http://localhost:5001/students/getbyCohort/${session.data?.user.id}`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/students/getbyCohort/${session.data?.user.auth_id}`, {
         headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
-        }
-    }
-    );
-    // const dat: volunteerColumn[] = [{ id: "101", name: "Someone" }, { id: "102", name: "Someone else" }]
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke: true,
+    }, [session]);
+
     return (
         <Tabs id="cohort-tab" defaultValue="students">
             <div className="container mx-auto my-6 px-2 lg:px-8">
                 <div className="flex flex-col lg:flex-row items-start justify-between mb-2 py-4 rounded bg-primary text-white px-4">
                     <div className=" pb-1">
                         <h1 className="text-2xl font-bold">Name</h1>
-                        {/* <div className=" text-sm">Name</div> */}
                     </div>
                     <div className="flex gap-1 w-full flex-row justify-end">
 
-                        {/* <TabsContent value="students" className=" text-black m-0" >
-                            <AddStudent />
-                        </TabsContent> */}
+                        <TabsContent value="volunteers" className=" text-black m-0" >
+                            <AssignVolunteer cohId={Number(params.slug)} />
+                        </TabsContent>
                         <TabsList>
                             <TabsTrigger value="students">
-                                <UserMultipleIcon />
+                                <AcademicCapIcon />
                             </TabsTrigger>
                             <TabsTrigger value="volunteers">
-                                <AcademicCapIcon />
+                                <UserMultipleIcon />
                             </TabsTrigger>
                         </TabsList>
                     </div>
-                    {/* <h1 className="rounded-sm text-xs bg-primary text-white p-1 font-bold pl-1 md:mr-5"></h1> */}
                 </div>
                 <div className="overflow-x-auto">
                     <TabsContent value="students">
@@ -87,10 +91,9 @@ export default function Page({
                         </div>}
                     </TabsContent>
                     <TabsContent value="volunteers">
-                        {data && <div>
+                        {data && data.constructor === Array && <div>
                             <VolunteerTable columns={columns} data={data[0].vol} />
                         </div>}
-                        {/* <VolunteerTable columns={columns} data={data} /> */}
                     </TabsContent>
                 </div>
             </div>

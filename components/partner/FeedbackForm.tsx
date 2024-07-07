@@ -1,5 +1,5 @@
 "use client"
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useListState } from '@mantine/hooks';
 import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
@@ -38,7 +38,7 @@ import {
     CommandList,
 } from "@/components/ui/command"
 import axios from "axios"
-import { useFetch } from "@mantine/hooks"
+import { useFetch } from "@/lib/useFetch"
 import { useSession } from 'next-auth/react'
 
 
@@ -88,12 +88,15 @@ export default function FeedbackForm() {
     }
 
     const cohortData = useFetch<cohortColumn[]>(
-        `http://localhost:5001/cohort/poc/${session.data?.user.auth_token}`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cohort/poc/${session.data?.user.auth_id}`, {
         headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
-        }
-    }
-    );
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke: true,
+    },[session]);
+
+    // useEffect(() => {
+    //     console.log(cohortData.data)
+    // }, [cohortData])
 
     const router = useRouter()
     const [questionCount, setQuestionCount] = useState(0);
@@ -103,7 +106,7 @@ export default function FeedbackForm() {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("")
     const [recipientCohortCount, setRecipientCohortCount] = useState(0)
-    const [recipientPartnerCount, setRecipientPartnerCount] = useState(0)
+    const [recipientPartnerCount, setRecipientPartnerCount] = useState(1)
     const [recipientCohorts, setRecipientCohorts] = useListState<cohortColumn>([])
     // const [recipientPartners, setRecipientPartners] = useListState<partner>([])
     const [questions, setQuestions] = useListState<FeedbackItem>([])
@@ -373,37 +376,40 @@ export default function FeedbackForm() {
 
 
         if (recipientPartnerCount != 0) {
+            // console.log("Got here")
             try {
                 if (questionCount != 0) {
+                    
                     const resp = await axios.post(
-                        `http://localhost:5001/forms/create`,
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/forms/create`,
                         {
                             "receipientType": "poc",
-                            "receipientId": [session.data?.user.id],
+                            "receipientId": [session.data?.user.auth_id],
                             "feedbackItemCount": recipientPartnerCount,
                             "feedbackItems": questions,
                         }, {
                         headers: {
-                            Authorization: `bearer ${session.data?.user.auth_token}`
+                            authorization: `Bearer ${session.data?.user.auth_token}`
                         }
                     }
                         // { withCredentials: true }
                     );
                     if (resp.data.id) {
                         const resp2 = await axios.post(
-                            `http://localhost:5001/notification/poc/create`,
+                            `${process.env.NEXT_PUBLIC_API_BASE_URL}/notification/poc/create`,
                             {
                                 "typeofnotification": "form",
                                 "Message": feedbackTitle,
                                 "form_id": resp.data.id,
-                                "receipient_id": [session.data?.user.id]
+                                "receipient_id": [session.data?.user.auth_id]
                             }, {
                             headers: {
-                                Authorization: `bearer ${session.data?.user.auth_token}`
+                                authorization: `Bearer ${session.data?.user.auth_token}`
                             }
                         }
                             // { withCredentials: true }
                         );
+                        console.log("THe resp2 error:", resp2.data)
                     }
 
 
@@ -427,7 +433,7 @@ export default function FeedbackForm() {
                 if (questionCount != 0) {
                     const cohs = recipientCohorts.map(x => x.id)
                     const resp = await axios.post(
-                        `http://localhost:5001/forms/create`,
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/forms/create`,
                         {
                             "receipientType": "cohort",
                             "receipientId": cohs,
@@ -435,14 +441,14 @@ export default function FeedbackForm() {
                             "feedbackItems": questions,
                         }, {
                         headers: {
-                            Authorization: `bearer ${session.data?.user.auth_token}`
+                            authorization: `Bearer ${session.data?.user.auth_token}`
                         }
                     }
                         // { withCredentials: true }
                     );
                     if (resp.data.id) {
                         const resp2 = await axios.post(
-                            `http://localhost:5001/notification/cohort/create`,
+                            `${process.env.NEXT_PUBLIC_API_BASE_URL}/notification/cohort/create`,
                             {
                                 "typeofnotification": "form",
                                 "Message": feedbackTitle,
@@ -450,7 +456,7 @@ export default function FeedbackForm() {
                                 "receipient_id": cohs
                             }, {
                             headers: {
-                                Authorization: `bearer ${session.data?.user.auth_token}`
+                                authorization: `Bearer ${session.data?.user.auth_token}`
                             }
                         }
                             // { withCredentials: true }
@@ -756,10 +762,10 @@ export default function FeedbackForm() {
                                 {/* <div>{index+1}.</div> */}
                                 <div className="flex flex-row justify-between items-center pb-1">
                                     <div className=' font-light text-xs px-1'>{index + 1}</div>
-                                    {value.type === "desc" && <div className=' font-light text-xs'>
+                                    {value.type === "descriptive" && <div className=' font-light text-xs'>
                                         Descriptive
                                     </div>}
-                                    {value.type === "mcq" && <div className=' font-light text-xs'>
+                                    {value.type === "multiplechoice" && <div className=' font-light text-xs'>
                                         Multiple Choice
                                     </div>}
                                     {/* <div className=' font-light text-xs'>Descriptive</div> */}
@@ -769,7 +775,7 @@ export default function FeedbackForm() {
                                 <Textarea className="min-h-[100px] min-w-max" placeholder="Question" onChange={(e) => { handleDescChange(e, index) }} />
 
 
-                                {value.type === "mcq" && <div className="flex flex-col gap-2 pt-2">
+                                {value.type === "multiplechoice" && <div className="flex flex-col gap-2 pt-2">
                                     {value.options.map((opt, idx) => (
                                         <div key={idx} className=" flex flex-row gap-0">
                                             <div className='rounded-l-md bg-green-600 text-white pr-1 flex flex-col justify-between items-center'>
@@ -798,10 +804,10 @@ export default function FeedbackForm() {
                             {/* </Button> */}
                         </PopoverTrigger>
                         <PopoverContent className="w-80 flex flex-wrap">
-                            <PopoverClose onClick={() => { handleIncreaseQuestions("desc") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                            <PopoverClose onClick={() => { handleIncreaseQuestions("descriptive") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
                                 Descriptive
                             </PopoverClose>
-                            <PopoverClose onClick={() => { handleIncreaseQuestions("mcq") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                            <PopoverClose onClick={() => { handleIncreaseQuestions("multiplechoice") }} className="m-1 grow h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
                                 Multiple Choice
                             </PopoverClose>
                         </PopoverContent>

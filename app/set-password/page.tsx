@@ -10,9 +10,6 @@ export default function Page({
 }) {
     const token = searchParams["token"]
     return (
-        // <h1>Volunteer login page</h1>
-        // <div className="flex items-center justify-center min-h-screen">
-        // <div className="flex h-screen w-full items-center justify-center bg-gray-100 px-4 dark:bg-gray-950">
         <div className="flex min-h-[100dvh] items-center justify-center bg-gray-100 px-4 py-12 dark:bg-gray-950">
             <div className="w-full max-w-md space-y-8">
                 <div className="flex justify-center">

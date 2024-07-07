@@ -1,5 +1,4 @@
 "use client"
-import { signIn } from "next-auth/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
@@ -25,18 +24,9 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import React from "react"
 import { setPasswordSchema } from "@/lib/zod"
-import { ForgotPasswordPopup } from "@/components/volunteer/ForgotPasswordPopup"
 import axios from "axios"
-// import { setAuthState, IAuthState } from "@/lib/authSlice";
-// import { useAppDispatch } from "@/lib/store";
-
-
 
 export default function SetPassword({ token }: { token: string }) {
-    const router = useRouter()
-    // const dispatch = useAppDispatch();
-    // let curl = window.location.href
-    // let curRole = curl.split("//")[1].split(".")[0]
     const [showPassword1, setShowPassword1] = React.useState(false)
     const [showPassword2, setShowPassword2] = React.useState(false)
     const [confirmPassword, setConfirmPassword] = React.useState(false)
@@ -50,50 +40,26 @@ export default function SetPassword({ token }: { token: string }) {
 
 
     async function onSubmit(values: z.infer<typeof setPasswordSchema>) {
-        // await signIn("credentials", { values, redirect: false })
         const validatedFields = setPasswordSchema.safeParse(values)
         if (!validatedFields.success) {
             return { error: "Invalid fields!" }
         }
         const { password1, password2 } = validatedFields.data
 
-        // dispatch(setAuthState({
-        //     authState: true,
-        //     userId: "101",
-        //     role: "admin",
-        //     volId: null,
-        //     cohortId: null,
-        //     pocId: null,
-        // }))
-
         if (password1 === password2) {
             try {
                 const resp = await axios.post(
-                    `http://localhost:5001/auth/login/callback?token=${token}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/callback?token=${token}`,
                     {
                         "password": password1
                     }
-                    // { withCredentials: true }
                 );
-
-                if(resp.data.id) setConfirmPassword(true);
-
+                if (resp.data.id) setConfirmPassword(true);
                 console.log("The error is this:", resp.data)
-
-                // console.log("This is the data:",resp.data)
             } catch (e) {
                 console.log(e)
             }
-
-            // await signIn("credentials", { email: email, password: password, role: role, redirect: false })
-
-            // await signIn("credentials", { redirect: false}, values)
-            // router.push("/dashboard")
-        } else {
-
         }
-
-
     }
 
     function togglePasswordVisiblity1() {
@@ -104,7 +70,6 @@ export default function SetPassword({ token }: { token: string }) {
         setShowPassword2(!showPassword2)
     }
 
-
     return (
         <div>
             {!confirmPassword && <div>
@@ -113,28 +78,9 @@ export default function SetPassword({ token }: { token: string }) {
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader className="flex flex-row justify-center">
                                 <CardTitle className="text-2xl font-bold">Set your password</CardTitle>
-                                {/* <CardDescription>
-                            Enter your email and password to access your volunteer account.
-                        </CardDescription> */}
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {/* <FormField
-                                control={form.control}
-                                name="password1"
-                                render={({ field }) => (
-                                    <FormItem className="space-y-2">
-                                        <FormLabel>Password</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="" {...field} required type="password" />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Enter your email shared with OpenGrad.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            /> */}
                                     <FormField
                                         control={form.control}
                                         name="password1"
@@ -142,27 +88,6 @@ export default function SetPassword({ token }: { token: string }) {
                                             <FormItem className="relative space-y-2">
                                                 <div className="flex items-center">
                                                     <FormLabel>Password</FormLabel>
-                                                    {/* <ForgotPasswordPopup /> */}
-
-                                                    {/* <Dialog>
-                                                <DialogTrigger
-                                                    className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50">
-                                                    Forgot your password?
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle className="text-2xl font-bold">Reset Password</DialogTitle>
-                                                        <DialogDescription>
-                                                            <PasswordResetForm />
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-                                                </DialogContent>
-                                            </Dialog> */}
-                                                    {/* <Link
-                                                className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                                                href="#">
-                                                Forgot your password?
-                                            </Link> */}
                                                 </div>
                                                 <FormControl>
                                                     <div>
@@ -175,7 +100,6 @@ export default function SetPassword({ token }: { token: string }) {
                                                     </div>
                                                 </FormControl>
                                                 <FormDescription>
-                                                    {/* Provide a Password. */}
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -188,27 +112,6 @@ export default function SetPassword({ token }: { token: string }) {
                                             <FormItem className="relative space-y-2">
                                                 <div className="flex items-center">
                                                     <FormLabel>Confirm password</FormLabel>
-                                                    {/* <ForgotPasswordPopup /> */}
-
-                                                    {/* <Dialog>
-                                                <DialogTrigger
-                                                    className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50">
-                                                    Forgot your password?
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle className="text-2xl font-bold">Reset Password</DialogTitle>
-                                                        <DialogDescription>
-                                                            <PasswordResetForm />
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-                                                </DialogContent>
-                                            </Dialog> */}
-                                                    {/* <Link
-                                                className="ml-auto inline-block text-sm text-gray-500 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                                                href="#">
-                                                Forgot your password?
-                                            </Link> */}
                                                 </div>
                                                 <FormControl>
                                                     <div>
@@ -221,7 +124,6 @@ export default function SetPassword({ token }: { token: string }) {
                                                     </div>
                                                 </FormControl>
                                                 <FormDescription>
-                                                    {/* Provide a Password. */}
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -262,8 +164,8 @@ const EyeSlashIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 const CheckmarkCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
-    <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 11.3151 21.9311 10.6462 21.8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M8 12.5C8 12.5 9.5 12.5 11.5 16C11.5 16 17.0588 6.83333 22 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+        <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 11.3151 21.9311 10.6462 21.8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M8 12.5C8 12.5 9.5 12.5 11.5 16C11.5 16 17.0588 6.83333 22 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
 );

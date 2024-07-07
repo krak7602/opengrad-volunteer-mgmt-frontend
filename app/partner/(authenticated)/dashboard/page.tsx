@@ -1,10 +1,7 @@
 "use client"
-import React, { useState } from "react"
-import { useListState } from "@mantine/hooks"
-import { Button } from "@/components/ui/button"
+import React, { useState, useEffect } from "react"
 import { useSession } from 'next-auth/react'
 import { useFetch } from "@/lib/useFetch"
-// import PartnerListing from "@/components/admin/PartnerListing"
 import { AddVolunteer } from "@/components/partner/AddVolunteer"
 import { VolunteerTable } from "@/components/partner/VolunteerTable"
 import { columns } from "@/components/partner/VolunteerColumn"
@@ -35,13 +32,12 @@ export default function Page({
     }
 
     const { data, loading, error, refetch, abort } = useFetch<vol[]>(
-        `http://localhost:5001/user/volbyPoc/${session.data?.user.id}`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/volbyPoc/${session.data?.user.auth_id}`, {
         headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
-        }
-    }
-    );
-    // const dat: volunteerColumn[] = [{ id: "101", name: "Someone" }, { id: "102", name: "Someone else" }]
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke: true,
+    }, [session]);
+    console.log(data)
     return (
         <div className="container mx-auto my-6 px-2 lg:px-8">
             <div className="flex flex-col lg:flex-row items-start justify-between mb-2 py-4 rounded bg-primary text-white px-4">
@@ -53,7 +49,6 @@ export default function Page({
                         <AddVolunteer />
                     </div>
                 </div>
-                {/* <h1 className="rounded-sm text-xs bg-primary text-white p-1 font-bold pl-1 md:mr-5"></h1> */}
             </div>
             <div className="overflow-x-auto">
                 {data && data.constructor === Array && <div>

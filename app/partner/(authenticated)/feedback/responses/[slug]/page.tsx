@@ -1,9 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
-import { useListState } from "@mantine/hooks"
 import { Button } from "@/components/ui/button"
 import { useFetch } from "@mantine/hooks"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import { useSession } from 'next-auth/react'
 
@@ -33,7 +31,7 @@ export default function Page({
     }
     const title = searchParams["title"]
     const { data, loading, error, refetch, abort } = useFetch<userResponse[]>(
-        `http://localhost:5001/forms/getresponse/${params.slug}`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/forms/getresponse/${params.slug}`, {
         headers: {
             authorization: `bearer ${session.data?.user.auth_token}`
         }
@@ -60,21 +58,6 @@ export default function Page({
 
     }
 
-    const cohortList = [
-        {
-            id: 112,
-            name: "JEE Advanced 2020",
-        },
-        {
-            id: 113,
-            name: "NEET 2024",
-        },
-        {
-            id: 114,
-            name: "GMAT 2023",
-        },
-    ]
-
     return (
         <div className="container mx-auto my-6 px-2 lg:px-8">
             <div className="flex flex-col lg:flex-row items-start justify-between mb-2 pt-4 pb-2 rounded bg-primary text-white px-4">
@@ -83,9 +66,7 @@ export default function Page({
                     {data && <div className=" text-sm">
                         {data[currentResponseId].vol_id}
                     </div>}
-                    {/* <div className=" text-sm">Name</div> */}
                 </div>
-                {/* <div className="flex gap-1 w-full flex-row justify-end"> */}
                 <div className=" self-end flex items-center justify-end space-x-2 py-4">
                     <Button
                         variant="outline"
@@ -104,21 +85,6 @@ export default function Page({
                         <ArrowRightIcon />
                     </Button>
                 </div>
-
-
-                {/* <TabsContent value="students" className=" text-black m-0" >
-                        <AddStudent />
-                    </TabsContent>
-                    <TabsList>
-                        <TabsTrigger value="students">
-                            <UserMultipleIcon />
-                        </TabsTrigger>
-                        <TabsTrigger value="volunteers">
-                            <AcademicCapIcon />
-                        </TabsTrigger>
-                    </TabsList> */}
-                {/* </div> */}
-                {/* <h1 className="rounded-sm text-xs bg-primary text-white p-1 font-bold pl-1 md:mr-5"></h1> */}
             </div>
             <div className="overflow-x-auto">
                 {data && <div>
@@ -136,7 +102,6 @@ export default function Page({
                                     <Separator />
                                 </div>}
                             </div>
-
                         )
                     })}
                 </div>}

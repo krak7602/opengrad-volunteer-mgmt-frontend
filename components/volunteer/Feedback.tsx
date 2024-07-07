@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { useFetch, useListState } from "@mantine/hooks"
+import { useFetch } from "@/lib/useFetch"
+import { useListState } from "@mantine/hooks"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios";
+import { useSession } from "next-auth/react"
 
 export default function Feedback({ feedbackId, title }: { feedbackId: string, title: string }) {
     const router = useRouter()
+    const session = useSession();
     // interface responseItem {
     //     id: number,
     //     feedbackitem_id: number,
@@ -30,8 +33,11 @@ export default function Feedback({ feedbackId, title }: { feedbackId: string, ti
 
 
     const { data, loading, error, refetch, abort } = useFetch<Feedback>(
-        `http://localhost:5001/forms/get/${feedbackId}`
-    );
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/forms/get/${feedbackId}`, {
+        headers: {
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke: true,
+    }, [session]);
     interface FeedbackItem {
         id: number,
         type: string,
@@ -171,12 +177,16 @@ export default function Feedback({ feedbackId, title }: { feedbackId: string, ti
         try {
             if (data) {
                 const resp = await axios.post(
-                    `http://localhost:5001/forms/response`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/forms/response`,
                     {
                         "form_id": data?.id,
-                        "vol_id": 4,
+                        "vol_id": session.data?.user.auth_id,
                         "feedbackitemResponses": respItems,
+                    }, {
+                    headers: {
+                        authorization: `Bearer ${session.data?.user.auth_token}`
                     }
+                }
                     // { withCredentials: true }
                 );
                 // console.log("This is the data:",resp.data)
@@ -209,7 +219,7 @@ export default function Feedback({ feedbackId, title }: { feedbackId: string, ti
                                             <Textarea className="min-h-[100px] min-w-max text-sm" onChange={(e) => { handleDescChange(e, index) }} />
                                         </div>}
                                         {value.type === "multiplechoice" && <div>
-                                            <RadioGroup onValueChange={e => {handleOptChange(e, index)}}>
+                                            <RadioGroup onValueChange={e => { handleOptChange(e, index) }}>
                                                 {value.options.map((opt, idx) => (
                                                     <div key={idx} className="flex items-center space-x-2">
                                                         <RadioGroupItem value={opt} id={opt} />

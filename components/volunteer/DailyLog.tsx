@@ -37,9 +37,13 @@ import { columns } from "@/components/volunteer/logColumn"
 import { LogTable } from "@/components/volunteer/logTable"
 import { useListState } from '@mantine/hooks';
 import axios from "axios"
+import { useSession } from 'next-auth/react'
+import LogHistory from '@/components/volunteer/LogHistory';
+
 
 export default function DailyLog() {
     const router = useRouter()
+    const session = useSession();
     const [numSlots, setNumSlots] = useState(0);
     const [formData, setFormData] = useListState<slotItem>();
     // const [logData, setLogData] = useState<logHist>()
@@ -58,32 +62,32 @@ export default function DailyLog() {
 
     }
 
-    function getData(): logDay[] {
-        // Fetch data from your API here.
-        return [{ "date": new Date("2024-06-28T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "07", "minStart": "00", "hourEnd": "08", "minEnd": "00", "activity": "Content Creation", "details": "Created P" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Q" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
-        { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },];
-    }
+    // function getData(): logDay[] {
+    //     // Fetch data from your API here.
+    //     return [{ "date": new Date("2024-06-28T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "07", "minStart": "00", "hourEnd": "08", "minEnd": "00", "activity": "Content Creation", "details": "Created P" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Q" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },
+    //     { "date": new Date("2024-06-29T18:30:00.000Z"), "slots": [{ "id": 0, "hourStart": "08", "minStart": "00", "hourEnd": "09", "minEnd": "00", "activity": "Content Creation", "details": "Created X" }, { "id": 1, "hourStart": "10", "minStart": "30", "hourEnd": "11", "minEnd": "00", "activity": "Mentoring", "details": "Mentored Y" }] },];
+    // }
 
-    const dataLogx = getData()
+    // const dataLogx = getData()
 
     const handleTimeChange = (value: string, index: number, field: string, pos: string) => {
         // const handleData = formData
@@ -195,12 +199,16 @@ export default function DailyLog() {
         try {
             if (formData && date) {
                 const resp = await axios.post(
-                    `http://localhost:5001/attendence/create`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/attendence/create`,
                     {
-                        "vol_id": 1,
+                        "vol_id": session.data?.user.auth_id,
                         "Date": `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`,
                         "Logs": formData,
+                    }, {
+                    headers: {
+                        authorization: `Bearer ${session.data?.user.auth_token}`
                     }
+                }
                     // { withCredentials: true }
                 );
 
@@ -376,7 +384,8 @@ export default function DailyLog() {
                 </TabsContent>
                 <TabsContent value="history">
                     <div className="container px-0 py-1">
-                        <LogTable columns={columns} data={dataLogx} />
+                        <LogHistory/>
+                        {/* <LogTable columns={columns} data={dataLogx} /> */}
                     </div>
                 </TabsContent>
             </Tabs>

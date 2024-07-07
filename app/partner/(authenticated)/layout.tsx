@@ -1,5 +1,5 @@
-import BottomNavBar from "@/components/volunteer/BottomNavBar"
-import SideNavBar from "@/components/volunteer/SideNavBar"
+import BottomNavBar from "@/components/partner/BottomNavBar"
+import SideNavBar from "@/components/partner/SideNavBar"
 import SessionWrapper from "@/components/SessionWrapper"
 import { Toaster } from "@/components/ui/toaster"
 

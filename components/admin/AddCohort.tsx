@@ -1,23 +1,11 @@
 import * as React from "react"
-import { useState, useEffect } from "react";
-
-import { cn } from "@/lib/utils"
-import { useMediaQuery } from "@/hooks/use-media-query"
+import { useState } from "react";
 import { useListState } from '@mantine/hooks';
 import { Button } from "@/components/ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
     DrawerFooter,
     DrawerHeader,
     DrawerTitle,
@@ -26,13 +14,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-import { PopoverClose } from '@radix-ui/react-popover';
-import { format } from "date-fns"
 import {
     Accordion,
     AccordionContent,
@@ -47,10 +28,9 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-    CommandSeparator
 } from "@/components/ui/command"
 import { useSession } from 'next-auth/react'
-import { useFetch } from "@mantine/hooks"
+import { useFetch } from "@/lib/useFetch"
 
 interface poc_user_id {
     id: number,
@@ -64,42 +44,21 @@ interface poc {
     user_id: poc_user_id
 }
 
-interface partner {
-    id: number,
-    name: string,
-}
 export function AddCohort() {
     const session = useSession();
     const [open, setOpen] = React.useState(false)
-    const isDesktop = useMediaQuery("(min-width: 768px)")
     const [orgName, setOrgName] = React.useState("")
     const [fromDate, setFromDate] = React.useState<Date>();
     const [toDate, setToDate] = React.useState<Date>();
     const [recipientPartners, setRecipientPartners] = useListState<poc>([])
     const [recipientPartnerCount, setRecipientPartnerCount] = useState(0)
-    // interface poc_user_id {
-    //     id: number,
-    //     name: string,
-    //     email: string,
-    //     role: string,
-    // }
-
-    // interface poc {
-    //     id: number,
-    //     user_id: poc_user_id
-    // }
-
-    // interface partner {
-    //     id: number,
-    //     name: string,
-    // }
+    const [send, setSend] = useState(false)
     const { data, loading, error, refetch, abort } = useFetch<poc[]>(
-        `http://localhost:5001/user/get/poc`, {
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/get/poc`, {
         headers: {
-            authorization: `bearer ${session.data?.user.auth_token}`
-        }
-    }
-    );
+            authorization: `Bearer ${session.data?.user.auth_token}`
+        }, autoInvoke: true,
+    }, [session]);
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -112,53 +71,27 @@ export function AddCohort() {
         try {
             if (fromDate && toDate && orgName !== "") {
                 const resp = await axios.post(
-                    `http://localhost:5001/cohort/create`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/cohort/create`,
                     {
                         "name": orgName,
                         "startDate": `${fromDate.getDate()}-${fromDate.getMonth() + 1}-${fromDate.getFullYear()}`,
                         "endDate": `${toDate.getDate()}-${toDate.getMonth() + 1}-${toDate.getFullYear()}`,
                         "poc": pocs
+                    }, {
+                    headers: {
+                        authorization: `Bearer ${session.data?.user.auth_token}`
                     }
-                    // { withCredentials: true }
+                }
                 );
-
+                if (resp.data.id) {
+                    setSend(true)
+                }
                 console.log("The error is this:", resp.data)
             }
-            // console.log("This is the data:",resp.data)
         } catch (e) {
             console.log(e)
         }
     }
-
-    // const partnerList: partner[] = [
-    //     {
-    //         id: 112,
-    //         name: "NIT Trichy",
-    //     },
-    //     {
-    //         id: 113,
-    //         name: "NIT Suratkal",
-    //     },
-    //     {
-    //         id: 114,
-    //         name: "NIT Calicut",
-    //     },
-    //     {
-    //         id: 115,
-    //         name: "IIT Kharagpur",
-    //     },
-    // ]
-    const partnerList: poc[] = [
-        {
-            "id": 1,
-            "user_id": {
-                "id": 2,
-                "name": "ParRahul1",
-                "email": "ogvpvujz7@mozmail.com",
-                "role": "poc"
-            }
-        }
-    ]
 
     const AddPartner = (selectedPartner: string) => {
         let found = false
@@ -168,16 +101,6 @@ export function AddCohort() {
         if (!found && data) {
             data.forEach(element => {
                 if (element.user_id.name === selectedPartner) {
-                    // if (recipientPartnerCount === 0) {
-                    //     const handlePartners: partner[] = [element]
-                    //     setRecipientPartners(handlePartners)
-                    //     setRecipientPartnerCount(recipientPartnerCount + 1)
-                    // } else {
-                    //     const handlePartners = recipientPartners
-                    //     handlePartners?.push(element)
-                    //     setRecipientPartners(handlePartners)
-                    //     setRecipientPartnerCount(recipientPartnerCount + 1)
-                    // }
                     setRecipientPartners.append(element)
                     setRecipientPartnerCount(recipientPartnerCount + 1)
                 }
@@ -186,149 +109,101 @@ export function AddCohort() {
     }
 
     const RemovePartner = (id: number) => {
-        // const handleCohorts = recipientCohorts
-        // handleCohorts?.splice(id, 1)
-        // setRecipientCohorts(handleCohorts)
-        // setRecipientCohortCount(recipientCohortCount - 1)
         setRecipientPartners.remove(id)
         setRecipientPartnerCount(recipientPartnerCount - 1)
     }
-    // useEffect(() => {
-    //     if (data) {
-    //         // setResponseCount(data?.length);
-    //         console.log(data)
-    //     }
-    // }, [data]);
-    // if (isDesktop) {
-    //     return (
-    //         <Dialog open={open} onOpenChange={setOpen}>
-    //             <DialogTrigger asChild>
-    //                 <Button variant="outline">Add Cohort</Button>
-    //             </DialogTrigger>
-    //             <DialogContent className="sm:max-w-[425px]">
-    //                 <DialogHeader>
-    //                     <DialogTitle>Add Cohort</DialogTitle>
-    //                     {/* <DialogDescription>
-    //                         Make changes to your profile here. Click save when you're done.
-    //                     </DialogDescription> */}
-    //                 </DialogHeader>
-    //                 <PartnerAddForm />
-    //             </DialogContent>
-    //         </Dialog>
-    //     )
-    // }
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>
-                {/* <div>Add cohort</div> */}
                 <Button variant="outline">Add Cohort</Button>
             </DrawerTrigger>
             <DrawerContent>
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Add Cohort</DrawerTitle>
-                    {/* <DrawerDescription>
-                        Make changes to your profile here. Click save when you're done.
-                    </DrawerDescription> */}
                 </DrawerHeader>
-                {/* <PartnerAddForm className="px-4" /> */}
-                <div className=" px-4">
-                    <form onSubmit={onSubmit} className="grid items-start gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Cohort Name</Label>
-                            <Input type="text" id="name" onChange={e => { setOrgName(e.target.value) }} />
-                        </div>
-                        <div>
-                            {/* <Label htmlFor="startdate">Start Date</Label> */}
-                            <Accordion type="single" collapsible>
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger>
-                                        <Label htmlFor="enddate">Start Date</Label>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <Calendar initialFocus mode="single" selected={fromDate} onSelect={setFromDate} />
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-                            {/* <Calendar className=" h-30" initialFocus mode="single" selected={fromDate} onSelect={setFromDate} /> */}
+                <div>
+                    {send && <div className=" flex flex-col items-center gap-3">
+                        <CheckmarkCircleIcon className=" text-primary" />
+                        <div>New cohort has been created successfully.</div>
+                    </div>}
+                    {!send && <div className=" px-4">
+                        <form onSubmit={onSubmit} className="grid items-start gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Cohort Name</Label>
+                                <Input type="text" id="name" onChange={e => { setOrgName(e.target.value) }} />
+                            </div>
+                            <div>
+                                <Accordion type="single" collapsible>
+                                    <AccordionItem value="item-1">
+                                        <AccordionTrigger>
+                                            <Label htmlFor="startdate">Start Date</Label>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <Calendar initialFocus mode="single" selected={fromDate} onSelect={setFromDate} />
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
+                            </div>
+                            <div>
+                                <Accordion type="single" collapsible>
+                                    <AccordionItem value="item-1">
+                                        <AccordionTrigger>
+                                            <Label htmlFor="enddate">End Date</Label>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} />
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
 
-                        </div>
-                        <div>
-                            {/* <Label htmlFor="enddate">End Date</Label> */}
-                            {/* <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} /> */}
-                            <Accordion type="single" collapsible>
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger>
-                                        <Label htmlFor="enddate">End Date</Label>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} />
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-
-                        </div>
-                        <div>
-                            <Accordion type="single" collapsible>
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger>
-                                        <Label htmlFor="enddate">Members</Label>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {recipientPartners?.map((value, index) => (
-                                                    <div key={index} className="bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
-                                                        <div>{value.user_id.name}</div>
-                                                        <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
-                                                    </div>
-                                                ))}
+                            </div>
+                            <div>
+                                <Accordion type="single" collapsible>
+                                    <AccordionItem value="item-1">
+                                        <AccordionTrigger>
+                                            <Label htmlFor="members">Members</Label>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {recipientPartners?.map((value, index) => (
+                                                        <div key={index} className="bg-gray-500 text-white rounded-sm text-xs font-semibold px-1 flex flex-row items-center">
+                                                            <div>{value.user_id.name}</div>
+                                                            <CancelIcon onClick={() => RemovePartner(index)} className=" w-3 h-3 ml-1 text-white" />
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <Command >
-                                            <CommandInput placeholder="Add Member Organization" />
-                                            <CommandList >
-                                                <CommandEmpty>No recipient found.</CommandEmpty>
-                                                <CommandGroup className=" overflow-y-auto h-32 lg:h-56">
-                                                    {data && data.constructor === Array && <div>
-                                                        {data.map((partner) => (
-                                                            <CommandItem
-                                                                key={partner.id}
-                                                                value={partner.user_id.name}
-                                                                onSelect={(currentValue) => {
-                                                                    AddPartner(currentValue)
-                                                                    // setValue(currentValue === value ? "" : currentValue)
-                                                                    // setOpen(false)
-                                                                }}
-                                                            >
-                                                                {/* <Check
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            value === partner.name ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    /> */}
-                                                                {partner.user_id.name}
-                                                            </CommandItem>
-                                                        ))}
-                                                    </div>}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-
-                        </div>
-
-
-                        {/* <div className="grid gap-2">
-                <Label htmlFor="username"></Label>
-                <Input id="username" defaultValue="@shadcn" />
-            </div> */}
-                        <Button type="submit">Add</Button>
-                    </form>
+                                            <Command >
+                                                <CommandInput placeholder="Add Member Organization" />
+                                                <CommandList >
+                                                    <CommandEmpty>No recipient found.</CommandEmpty>
+                                                    <CommandGroup className=" overflow-y-auto h-32 lg:h-56">
+                                                        {data && data.constructor === Array && <div>
+                                                            {data.map((partner) => (
+                                                                <CommandItem
+                                                                    key={partner.id}
+                                                                    value={partner.user_id.name}
+                                                                    onSelect={(currentValue) => {
+                                                                        AddPartner(currentValue)
+                                                                    }}
+                                                                >
+                                                                    {partner.user_id.name}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </div>}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
+                            </div>
+                            <Button type="submit">Add</Button>
+                        </form>
+                    </div>}
                 </div>
-
                 <DrawerFooter className="pt-2">
                     <DrawerClose asChild>
                         <Button variant="outline">Cancel</Button>
@@ -339,186 +214,12 @@ export function AddCohort() {
     )
 }
 
-// function SetItCommand(pocs:poc[]) {
-//     if(pocs.constructor===Array) {
-//         return (
-//             <div></div>
-//         )
-//     }
-// }
-
-function PartnerAddForm({ className }: React.ComponentProps<"form">) {
-    const [openCommand, setOpenCommand] = React.useState(false)
-    const [orgName, setOrgName] = React.useState("")
-    const [fromDate, setFromDate] = React.useState<Date>();
-    const [toDate, setToDate] = React.useState<Date>();
-    // const [recipientCohorts, setRecipientCohorts] = useListState<cohort>([])
-    // const [recipientCohortCount, setRecipientCohortCount] = useState(0)
-    interface partner {
-        id: number,
-        name: string,
-    }
-    const onSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-
-        console.log("orgName:", orgName);
-        console.log("From:", fromDate)
-        console.log("To:", toDate)
-    }
-    // const AddCohort = (selectedCohort: string) => {
-    //     let found = false
-    //     recipientCohorts?.forEach(element => {
-    //         if (element.name === selectedCohort) found = true;
-    //     })
-    //     if (!found) {
-    //         cohortList.forEach(element => {
-    //             if (element.name === selectedCohort) {
-    //                 // if (recipientCohortCount === 0) {
-    //                 //     const handleCohorts: cohort[] = [element]
-    //                 //     setRecipientCohorts(handleCohorts)
-    //                 //     setRecipientCohortCount(recipientCohortCount + 1)
-    //                 // } else {
-    //                 //     const handleCohorts = recipientCohorts
-    //                 //     handleCohorts?.push(element)
-    //                 //     setRecipientCohorts(handleCohorts)
-    //                 //     setRecipientCohortCount(recipientCohortCount + 1)
-    //                 // }
-    //                 setRecipientCohorts.append(element)
-    //                 setRecipientCohortCount(recipientCohortCount + 1)
-    //             }
-    //         });
-    //     }
-    // }
-    const partnerList: partner[] = [
-        {
-            id: 112,
-            name: "NIT Trichy",
-        },
-        {
-            id: 113,
-            name: "NIT Suratkal",
-        },
-        {
-            id: 114,
-            name: "NIT Calicut",
-        },
-        {
-            id: 115,
-            name: "IIT Kharagpur",
-        },
-    ]
-    return (
-        <form className={cn("grid items-start gap-4", className)}>
-            <div className="grid gap-2">
-                <Label htmlFor="name">Cohort Name</Label>
-                <Input type="text" id="name" onChange={e => { setOrgName(e.target.value) }} />
-            </div>
-            <div>
-                {/* <Label htmlFor="startdate">Start Date</Label> */}
-                <Accordion type="single" collapsible>
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>
-                            <Label htmlFor="enddate">Start Date</Label>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <Calendar initialFocus mode="single" selected={fromDate} onSelect={setFromDate} />
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-                {/* <Calendar className=" h-30" initialFocus mode="single" selected={fromDate} onSelect={setFromDate} /> */}
-
-            </div>
-            <div>
-                {/* <Label htmlFor="enddate">End Date</Label> */}
-                {/* <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} /> */}
-                <Accordion type="single" collapsible>
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>
-                            <Label htmlFor="enddate">End Date</Label>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} />
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-
-            </div>
-            <div>
-                {/* <Label htmlFor="enddate">End Date</Label> */}
-                {/* <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} /> */}
-                <Accordion type="single" collapsible>
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>
-                            <Label htmlFor="enddate">End Date</Label>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} />
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-
-            </div>
-
-
-
-            {/* <div className="grid gap-2">
-                <Label htmlFor="username"></Label>
-                <Input id="username" defaultValue="@shadcn" />
-            </div> */}
-            <Button onSubmit={onSubmit} type="submit">Add</Button>
-        </form>
-    )
-}
-
-
-//  <Popover>
-//     <PopoverTrigger asChild>
-//         <Button
-//             type="button"
-//             variant={"outline"}
-//             className={cn(
-//                 " w-full md:w-[280px] justify-start text-left font-normal",
-//                 !toDate && "text-muted-foreground"
-//             )}
-//         >
-//             {/* <Button className="w-full justify-start text-left font-normal" id="date" variant="outline"> */}
-//             <CalendarDaysIcon className="mr-1 h-4 w-4 -translate-x-1" />
-//             {toDate ? format(toDate, "PPP") : <span>Select a date</span>}
-//         </Button>
-//     </PopoverTrigger>
-//     <PopoverContent align="start" className="w-auto p-0">
-//         <PopoverClose>
-//             <Calendar initialFocus mode="single" selected={toDate} onSelect={setToDate} />
-//         </PopoverClose>
-//     </PopoverContent>
-// </Popover> 
-function CalendarDaysIcon(props: { className: string }) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M8 2v4" />
-            <path d="M16 2v4" />
-            <rect width="18" height="18" x="3" y="4" rx="2" />
-            <path d="M3 10h18" />
-            <path d="M8 14h.01" />
-            <path d="M12 14h.01" />
-            <path d="M16 14h.01" />
-            <path d="M8 18h.01" />
-            <path d="M12 18h.01" />
-            <path d="M16 18h.01" />
-        </svg>
-    )
-}
+const CheckmarkCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+        <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 11.3151 21.9311 10.6462 21.8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M8 12.5C8 12.5 9.5 12.5 11.5 16C11.5 16 17.0588 6.83333 22 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
 const CancelIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>

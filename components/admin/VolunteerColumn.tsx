@@ -1,16 +1,6 @@
 import { ColumnDef, CellContext } from "@tanstack/react-table"
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer"
-import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
+import { VolunteerDetails } from "@/components/admin/VolunteerDetails"
 
 export type volunteerColumn = {
     id: string,
@@ -36,12 +26,8 @@ interface vol {
 
 
 const CellComponent = (row: CellContext<vol, unknown>) => {
-    const router = useRouter()
     const projectedData = row.getValue() as string;
-    // const val:slotItem = getValue()
-    return <Button onClick={() => { router.push(`/volunteers/${projectedData}`) }}>
-        Details
-    </Button>
+    return <VolunteerDetails volId={Number(projectedData)} />
 }
 
 
@@ -66,15 +52,6 @@ export const columns: ColumnDef<vol>[] = [
             align: 'right'
         },
         cell: CellComponent
-        // cell: ({ getValue }) => {
-        //     const router = useRouter()
-        //     const projectedData = getValue() as string;
-        //     // const val:slotItem = getValue()
-        //     return <Button onClick={() => { router.push(`/partners/${projectedData}`) }}>
-        //         Details
-        //     </Button>
-        // }
-
     }
 
 ]

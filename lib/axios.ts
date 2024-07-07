@@ -5,7 +5,7 @@ const val = full?.name+"="+full?.value
 
 // // const cook = "connect.sid="+val
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5001',
+  baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL}`,
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
