@@ -1,17 +1,15 @@
-"use client"
-import React, { useState } from "react"
-import PartnerListing from "@/components/admin/PartnerListing"
+"use client";
+import PartnerListing from "@/components/admin/PartnerListing";
 export default function Page({
-    params,
-    searchParams,
+  params,
+  searchParams,
 }: {
-    params: { slug: string }
-    searchParams: { [key: string]: string | string[] | undefined }
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-    return (
-        <div>
-            <PartnerListing />
-        </div>
-
-    )
+  return (
+    <div>
+      <PartnerListing />
+    </div>
+  );
 }

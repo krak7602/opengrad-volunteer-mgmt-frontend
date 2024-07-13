@@ -1,17 +1,15 @@
-"use client"
-import React, { useState } from "react"
-import CohortListing from "@/components/partner/CohortListing"
+"use client";
+import CohortListing from "@/components/partner/CohortListing";
 export default function Page({
-    params,
-    searchParams,
+  params,
+  searchParams,
 }: {
-    params: { slug: string }
-    searchParams: { [key: string]: string | string[] | undefined }
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-    return (
-        <div>
-            <CohortListing />
-        </div>
-
-    )
+  return (
+    <div>
+      <CohortListing />
+    </div>
+  );
 }
